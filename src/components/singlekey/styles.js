@@ -3,9 +3,8 @@ import styled from 'styled-components'
 export const Container = styled.div`
     color: white;
     background-color: gray;
-    min-width: 4vw;
-    height: 100%;
-    border-radius: 10px;
+    min-width: 8%;
+    border-radius: 3px;
     display: flex;
     flex-direction: column;
     justify-content: center;

@@ -1,6 +1,9 @@
 import styled from 'styled-components'
 
 export const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
   height: 20vh;
   width: 100%;
   background-color: black;
@@ -12,6 +15,5 @@ export const KeyboardRow = styled.div`
   justify-content: space-around;
   width: 100%;
   background-color: black;
-  height: 20%;
-  margin-bottom: 8px;
+  height: 33%;
 `;
