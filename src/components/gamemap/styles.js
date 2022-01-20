@@ -22,7 +22,7 @@ flex-direction: column;
 justify-content: center;
 align-items: center;
 outline-style: solid;
-outline-color: dimgrey;
+outline-color: ${props => props.isCurrent ? 'LightBlue' : 'dimgrey'};
 outline-width: 2px;
 min-width: 10%;
 height: 5vh;
