@@ -21,14 +21,16 @@ const wordToGuess = 'CANDY';
 function App() {
   const [currentRow, setCurrentRow] = useState(0);
   const [currentColumn, setCurrentColumn] = useState(0);
-  const [currentMapValues, setCurrentMapValues] = useState(defaultMap);
+  const [currentMapValues, setCurrentMapValues] = useState([...defaultMap]);
   const [isWinner, setIsWinner] = useState(false);
 
   const handleClearWinner = () => {
     setIsWinner(false);
     setCurrentRow(0);
     setCurrentColumn(0);
-    setCurrentMapValues(defaultMap);
+    console.log('default map = ', defaultMap);
+    const blankMap = [...defaultMap];
+    setCurrentMapValues(blankMap);
   }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleKeyPress = (e) => {
@@ -129,7 +131,7 @@ function App() {
     }
     return isValid;
   }
-  // console.log('currentMapValues = ', currentMapValues[0][0], currentMapValues[0][1], currentMapValues[0][2], currentMapValues[0][3], currentMapValues[0][4]);
+  
   return (
     <Container>
       <Header />
