@@ -8,29 +8,33 @@ import { globalWordList } from "./globalWordList.js";
 const maxWordLength = 5;
 const maxRows = 6;
 const backSpaceKey = '<=';
-const defaultMap = [
-  [{value: ''}, {value: ''}, {value: ''}, {value: ''}, {value: ''},],
-  [{value: ''}, {value: ''}, {value: ''}, {value: ''}, {value: ''},],
-  [{value: ''}, {value: ''}, {value: ''}, {value: ''}, {value: ''},],
-  [{value: ''}, {value: ''}, {value: ''}, {value: ''}, {value: ''},],
-  [{value: ''}, {value: ''}, {value: ''}, {value: ''}, {value: ''},],
-  [{value: ''}, {value: ''}, {value: ''}, {value: ''}, {value: ''},],
-];
 const wordToGuess = 'CANDY';
+
+const buildDefaultMap = () => {
+  const map = [];
+  for (let row = 0; row < maxRows; row++) {
+    map[row] = [];
+    for (let col = 0; col < maxWordLength; col++) {
+      map[row][col] = { value: '' };
+    }
+  }
+  return map;
+}
 
 function App() {
   const [currentRow, setCurrentRow] = useState(0);
   const [currentColumn, setCurrentColumn] = useState(0);
-  const [currentMapValues, setCurrentMapValues] = useState([...defaultMap]);
+  const [currentMapValues, setCurrentMapValues] = useState(buildDefaultMap());
   const [isWinner, setIsWinner] = useState(false);
+  const [keyboardData, setKeyboardData] = useState({});
 
   const handleClearWinner = () => {
     setIsWinner(false);
     setCurrentRow(0);
     setCurrentColumn(0);
-    console.log('default map = ', defaultMap);
-    const blankMap = [...defaultMap];
+    const blankMap = buildDefaultMap();
     setCurrentMapValues(blankMap);
+    setKeyboardData({});
   }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleKeyPress = (e) => {
@@ -90,7 +94,8 @@ function App() {
             setIsWinner(true);
             return;
           }
-          if (checkValidWord () && currentRow + 1 < maxRows) {
+          if (checkValidWord() && currentRow + 1 < maxRows) {
+            checkValidLetters();
             setCurrentColumn(0);
             // console.log('currentROW, nextROW = ', currentRow, currentRow + 1);
             setCurrentRow(currentRow + 1);
@@ -131,13 +136,49 @@ function App() {
     }
     return isValid;
   }
+
+  const doesLetterExistInWord = (letter) => {
+    for (let column = 0; column < wordToGuess.length; column++) {
+      if (wordToGuess[column] === letter) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  const updateKeyboard = (letter, value) => {
+    const updatedKeyboardData = { ...keyboardData };
+    updatedKeyboardData[letter] = { value: value };
+    setKeyboardData(updatedKeyboardData);
+    console.log('updatedKeyboardData = ', updatedKeyboardData);
+  }
+  const checkValidLetters = () => {
+    const updatedMapValues = [...currentMapValues];
+    let submittedWord = buildWordFromCurrentRow();
+
+    for (let column = 0; column < maxWordLength; column++) {
+      const letterToCheck = submittedWord[column];
+      if (letterToCheck === wordToGuess[column]) {
+        updatedMapValues[currentRow][column] = { value: currentMapValues[currentRow][column].value, result: 2 };
+        updateKeyboard(letterToCheck, 2);
+      } else if (doesLetterExistInWord(letterToCheck)) {
+        updatedMapValues[currentRow][column] = { value: currentMapValues[currentRow][column].value, result: 1 };
+        updateKeyboard(letterToCheck, 1);
+      } else {
+        updatedMapValues[currentRow][column] = { value: currentMapValues[currentRow][column].value, result: 0 };
+        updateKeyboard(letterToCheck, 0);
+      }
+    }
+    setCurrentMapValues(updatedMapValues);
+    console.log('updatedMapValues = ', updatedMapValues);
+  }
   
   return (
     <Container>
       <Header />
       {!isWinner && <GameMap data={currentMapValues} row={currentRow} column={currentColumn} />}
       {isWinner && <Winner onClick={()=>handleClearWinner()}/>}
-      <Keyboard handleKeyPress={(e)=>handleKey(e)}/>
+      <Keyboard keyboardData={keyboardData} handleKeyPress={(e)=>handleKey(e)}/>
     </Container>
   );
 }
