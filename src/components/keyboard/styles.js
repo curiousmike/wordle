@@ -8,6 +8,7 @@ export const Container = styled.div`
   width: 100%;
   background-color: black;
   border-top: 2px solid #7777;
+  padding-bottom: 18px;
 `;
 
 export const KeyboardRow = styled.div`

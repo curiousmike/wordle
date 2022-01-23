@@ -1,11 +1,10 @@
-import { useState, useEffect, useContext } from 'react';
 import { Container, LetterContainer } from './styles'
 
 function SingleKey({ keyString, handleKeyPress, data }) {
-    console.log('keyString, data = ', keyString, data);
+    const keyColor = data['key-' + keyString];
     return (
-        <Container onClick={()=>handleKeyPress(keyString)}>
-            <LetterContainer>
+        <Container keyColor={keyColor} onClick={()=>handleKeyPress(keyString)}>
+            <LetterContainer >
                 {keyString}
             </LetterContainer>
       </Container>

@@ -1,4 +1,3 @@
-import { useState, useEffect, useContext } from 'react';
 import { Container, KeyboardRow } from './styles'
 import SingleKey from '../singlekey';
 const KeyboardRows = [
@@ -19,7 +18,7 @@ function Keyboard({handleKeyPress, keyboardData}) {
             {KeyboardRows.map((row, k) => 
                 <KeyboardRow key ={k}>
                     {row.map((keyValue, i) =>
-                        <SingleKey data={keyboardData} keyString={keyValue} key={i} handleKeyPress={handleKeyPress} key={i} />
+                        <SingleKey data={keyboardData} keyString={keyValue} key={i} handleKeyPress={handleKeyPress} />
                     )}
                 </KeyboardRow>
             )}
