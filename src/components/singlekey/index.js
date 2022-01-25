@@ -3,7 +3,7 @@ import { Container, LetterContainer } from './styles'
 function SingleKey({ keyString, handleKeyPress, data }) {
     const keyColor = data['key-' + keyString];
     return (
-        <Container keyColor={keyColor} onClick={()=>handleKeyPress(keyString)}>
+        <Container goKey={keyString === 'GO'} keyColor={keyColor} onClick={()=>handleKeyPress(keyString)}>
             <LetterContainer >
                 {keyString}
             </LetterContainer>

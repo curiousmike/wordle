@@ -4,6 +4,7 @@ import GameMap from './components/gamemap';
 import Keyboard from './components/keyboard';
 import Winner from './components/winner';
 import Loser from './components/loser';
+import NotWord from './components/notWord';
 import { Container } from './styles';
 import { globalWordList } from "./globalWordList.js";
 const maxWordLength = 5;
@@ -37,6 +38,7 @@ function App() {
   const [isWinner, setIsWinner] = useState(false);
   const [isLoser, setIsLoser] = useState(false);
   const [keyboardData, setKeyboardData] = useState({});
+  const [notWord, setNotWord] = useState(null);
   const [currentWordToGuessIndex, setCurrentWordToGuessIndex] = useState(0);
 
   const handleClearWinner = () => {
@@ -51,6 +53,13 @@ function App() {
   }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleKeyPress = (e) => {
+    console.log('key');
+    if (notWord) {
+      if (e.key === 'Escape' || e.key === 'Enter') {
+        setNotWord(null);
+        return;
+      }
+    }
     if (isWinner) {
       if (e.key === 'Escape' || e.key === 'Enter') {
         handleClearWinner();
@@ -100,16 +109,14 @@ function App() {
         setCurrentMapValues(map);
       }
     } else
-      if (keyEvent === 'ENTER') {
+      if (keyEvent === 'ENTER' || keyEvent === 'GO') {
         if (map[currentRow][currentColumn].value !== '' && currentColumn === maxWordLength - 1) {
           if (checkWinnerWord()) {
-            console.log('winner');
             setIsWinner(true);
             return;
           }
           if (checkIsLoser()) {
             setIsLoser(true);
-            console.log('loser');
             return;
           }
           if (checkValidWord() && currentRow + 1 < maxRows) {
@@ -139,8 +146,6 @@ function App() {
 
   const checkWinnerWord = () => {
     const submittedWord = buildWordFromCurrentRow();
-    console.log('currentWordToGuessIndex = ', currentWordToGuessIndex);
-    console.log('wordToGuesss = ', wordToGuess[currentWordToGuessIndex]);
     return submittedWord === wordToGuess[currentWordToGuessIndex];
   }
 
@@ -158,6 +163,9 @@ function App() {
         isValid = true;
         break;
       }
+    }
+    if (!isValid) {
+      setNotWord(submittedWord);
     }
     return isValid;
   }
@@ -199,16 +207,15 @@ function App() {
     }
     setKeyboardData(updatedKeyboardData);
     setCurrentMapValues(updatedMapValues);
-    // console.log('updatedKeyboardData = ', updatedKeyboardData);
-    // console.log('updatedMapValues = ', updatedMapValues);
   }
   
   return (
     <Container>
       <Header />
-      {!isWinner && !isLoser && <GameMap data={currentMapValues} row={currentRow} column={currentColumn} />}
+      {!isWinner && !isLoser && !notWord && <GameMap data={currentMapValues} row={currentRow} column={currentColumn} />}
       {isWinner && <Winner onClick={()=>handleClearWinner()}/>}
-      {isLoser && <Loser onClick={()=>handleClearWinner()}/>}
+      {isLoser && <Loser onClick={() => handleClearWinner()} />}
+      {notWord && <NotWord word={notWord} onClick={()=>setNotWord(null)}/>}
       <Keyboard keyboardData={keyboardData} handleKeyPress={(e)=>handleKey(e)}/>
     </Container>
   );
