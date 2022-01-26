@@ -12,10 +12,10 @@ const KeyboardRows = [
     ],
 ];
 
-function Keyboard({handleKeyPress, keyboardData}) {
+function Keyboard({handleKeyPress, keyboardData, visible}) {
     return (
         <Container>
-            {KeyboardRows.map((row, k) => 
+            {visible && KeyboardRows.map((row, k) => 
                 <KeyboardRow key ={k}>
                     {row.map((keyValue, i) =>
                         <SingleKey data={keyboardData} keyString={keyValue} key={i} handleKeyPress={handleKeyPress} />

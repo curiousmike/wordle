@@ -1,13 +1,15 @@
-import { useState, useEffect, useContext } from 'react';
-import { Container, Title } from './styles'
+import { Container, Title, Subtitle } from './styles'
 
-function Header() {
+function Header({level, handleClick}) {
 
     return (
-        <Container>
+        <Container onClick={handleClick}>
             <Title>
                 Wordle Clone
             </Title>
+            <Subtitle>
+                Level {level + 1}
+            </Subtitle>
       </Container>
   );
 }

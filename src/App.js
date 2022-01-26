@@ -4,14 +4,15 @@ import GameMap from './components/gamemap';
 import Keyboard from './components/keyboard';
 import Winner from './components/winner';
 import Loser from './components/loser';
+import Instructions from './components/instructions';
 import NotWord from './components/notWord';
 import { Container } from './styles';
 import { globalWordList } from "./globalWordList.js";
+import { readLevel, setLevel } from './storage';
+import { WordsToGuess }  from './wordList';
 const maxWordLength = 5;
 const maxRows = 6;
 const backSpaceKey = '<=';
-const wordToGuess = ['BEETS', 'CANDY', 'SPANS', 'SPICE', 'NEARS', 'CRYER', 'ACIDS', 'ACRID', 'ACTOR', 'ACUTE', 'ADEPT', 'BASED', 'BARNS', 'BOLTS', 'BOLTED', 'CLUES', 'COACH', 'COALS', 'ELDER', 'ELBOW', 'ELITE', 'REIGN', 'AISLE'];
-
 const buildDefaultMap = () => {
   const map = [];
   for (let row = 0; row < maxRows; row++) {
@@ -40,6 +41,15 @@ function App() {
   const [keyboardData, setKeyboardData] = useState({});
   const [notWord, setNotWord] = useState(null);
   const [currentWordToGuessIndex, setCurrentWordToGuessIndex] = useState(0);
+  const [showInstructions, setShowInstructions] = useState(true);
+  const [cheatCount, setCheatCount] = useState(0);
+  const GlobalWordsToGuess = WordsToGuess;
+  useEffect(() => {
+    const value = readLevel();
+    if (value) {
+      setCurrentWordToGuessIndex(value);
+    }
+  }, []); // empty second argument = "componentDidMount"
 
   const handleClearWinner = () => {
     setIsWinner(false);
@@ -50,10 +60,11 @@ function App() {
     setCurrentMapValues(blankMap);
     setKeyboardData({});
     setCurrentWordToGuessIndex(currentWordToGuessIndex + 1);
+    setLevel(currentWordToGuessIndex + 1);
   }
+  
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleKeyPress = (e) => {
-    console.log('key');
     if (notWord) {
       if (e.key === 'Escape' || e.key === 'Enter') {
         setNotWord(null);
@@ -72,8 +83,8 @@ function App() {
       }
     }
   }
-  const savedHandler = useRef();
   
+  const savedHandler = useRef();
   useEffect(() => {
     savedHandler.current = handleKeyPress;
   }, [handleKeyPress]);
@@ -145,8 +156,8 @@ function App() {
   }
 
   const checkWinnerWord = () => {
-    const submittedWord = buildWordFromCurrentRow();
-    return submittedWord === wordToGuess[currentWordToGuessIndex];
+    const submittedWord = buildWordFromCurrentRow().toLowerCase();
+    return submittedWord === GlobalWordsToGuess[currentWordToGuessIndex];
   }
 
   const checkIsLoser = () => {
@@ -171,28 +182,22 @@ function App() {
   }
 
   const doesLetterExistInWord = (letter) => {
-    for (let column = 0; column < wordToGuess[currentWordToGuessIndex].length; column++) {
-      if (wordToGuess[currentWordToGuessIndex][column] === letter) {
+    for (let column = 0; column < GlobalWordsToGuess[currentWordToGuessIndex].length; column++) {
+      if (GlobalWordsToGuess[currentWordToGuessIndex][column] === letter.toLowerCase()) {
         return true;
       }
     }
     return false;
   }
 
-  // const updateKeyboard = (letter, value) => {
-  //   const updatedKeyboardData = {};//  { ...keyboardData };
-  //   updatedKeyboardData[letter] = { value: value };
-  //   setKeyboardData(keyboardData => ({ ...keyboardData, updatedKeyboardData }));
-  //   console.log('updatedKeyboardData = ', updatedKeyboardData);
-  // }
   const checkValidLetters = () => {
     const updatedKeyboardData = { ...keyboardData };
     const updatedMapValues = [...currentMapValues];
     let submittedWord = buildWordFromCurrentRow();
 
     for (let column = 0; column < maxWordLength; column++) {
-      const letterToCheck = submittedWord[column];
-      if (letterToCheck === wordToGuess[currentWordToGuessIndex][column]) {
+      const letterToCheck = submittedWord[column].toLowerCase();
+      if (letterToCheck === GlobalWordsToGuess[currentWordToGuessIndex][column]) {
         updatedMapValues[currentRow][column] = { value: currentMapValues[currentRow][column].value, result: 2 };
         updatedKeyboardData['key-'+letterToCheck] = 2;
       } else if (doesLetterExistInWord(letterToCheck)) {
@@ -209,14 +214,25 @@ function App() {
     setCurrentMapValues(updatedMapValues);
   }
   
+  const handleCheat = () => {
+    console.log('cheat');
+    setCheatCount(cheatCount + 1);
+    if (cheatCount + 1 > 3) {
+      alert('word = ' + GlobalWordsToGuess[currentWordToGuessIndex]);
+      setCheatCount(0);
+    }
+  }
+  const showGameMap = !isWinner && !isLoser && !notWord && !showInstructions;
+  const showKeyboard = !showInstructions;
   return (
     <Container>
-      <Header />
-      {!isWinner && !isLoser && !notWord && <GameMap data={currentMapValues} row={currentRow} column={currentColumn} />}
+      <Header level={currentWordToGuessIndex} handleClick={() => handleCheat()}/>
+      {showGameMap && <GameMap data={currentMapValues} row={currentRow} column={currentColumn} />}
+      {showInstructions && <Instructions onClick={() => setShowInstructions(false)} />}
       {isWinner && <Winner onClick={()=>handleClearWinner()}/>}
       {isLoser && <Loser onClick={() => handleClearWinner()} />}
       {notWord && <NotWord word={notWord} onClick={()=>setNotWord(null)}/>}
-      <Keyboard keyboardData={keyboardData} handleKeyPress={(e)=>handleKey(e)}/>
+      {!showInstructions && <Keyboard keyboardData={keyboardData} handleKeyPress={(e) => handleKey(e)} visible={showKeyboard} />}
     </Container>
   );
 }
