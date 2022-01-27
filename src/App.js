@@ -31,6 +31,7 @@ const appHeight = () => {
 window.addEventListener('resize', appHeight)
 appHeight();
 
+const doDebug = true;
 
 function App() {
   const [currentRow, setCurrentRow] = useState(0);
@@ -43,11 +44,11 @@ function App() {
   const [currentWordToGuessIndex, setCurrentWordToGuessIndex] = useState(0);
   const [showInstructions, setShowInstructions] = useState(true);
   const [cheatCount, setCheatCount] = useState(0);
-  const GlobalWordsToGuess = WordsToGuess;
+  const GlobalWordsToGuess = doDebug ? ['beats'] : WordsToGuess;
   useEffect(() => {
     const value = readLevel();
     if (value) {
-      setCurrentWordToGuessIndex(value);
+      setCurrentWordToGuessIndex(doDebug ? 0 : value);
     }
   }, []); // empty second argument = "componentDidMount"
 
@@ -190,26 +191,41 @@ function App() {
     return false;
   }
 
+  const generateLetterCounts = () => {
+    const counts = {};
+    [...GlobalWordsToGuess[currentWordToGuessIndex]].forEach((letter) => {
+      if (counts[letter]) {
+        counts[letter].count = counts[letter].count + 1;
+      } else {
+        counts[letter] = {count: 1}
+      }
+    });
+    return counts;
+  }
   const checkValidLetters = () => {
     const updatedKeyboardData = { ...keyboardData };
     const updatedMapValues = [...currentMapValues];
     let submittedWord = buildWordFromCurrentRow();
-
+    const letterCounts = generateLetterCounts();
     for (let column = 0; column < maxWordLength; column++) {
       const letterToCheck = submittedWord[column].toLowerCase();
-      if (letterToCheck === GlobalWordsToGuess[currentWordToGuessIndex][column]) {
+      const letterDone = (letterCounts[letterToCheck]?.used && letterCounts[letterToCheck].used >= letterCounts[letterToCheck].count);
+      if (!letterDone && letterToCheck === GlobalWordsToGuess[currentWordToGuessIndex][column]) {
         updatedMapValues[currentRow][column] = { value: currentMapValues[currentRow][column].value, result: 2 };
-        updatedKeyboardData['key-'+letterToCheck] = 2;
-      } else if (doesLetterExistInWord(letterToCheck)) {
+        updatedKeyboardData['key-' + letterToCheck] = 2;
+        letterCounts[letterToCheck].used = letterCounts[letterToCheck].used ? letterCounts[letterToCheck].used + 1 : letterCounts[letterToCheck].used = 1;
+      } else if (!letterDone && doesLetterExistInWord(letterToCheck)) {
         updatedMapValues[currentRow][column] = { value: currentMapValues[currentRow][column].value, result: 1 };
         if (updatedKeyboardData['key-' + letterToCheck] !== 2) {
           updatedKeyboardData['key-' + letterToCheck] = 1;
+          letterCounts[letterToCheck].used = letterCounts[letterToCheck].used ? letterCounts[letterToCheck].used + 1 : letterCounts[letterToCheck].used = 1;
         }
       } else {
         updatedMapValues[currentRow][column] = { value: currentMapValues[currentRow][column].value, result: 0 };
         updatedKeyboardData['key-'+letterToCheck] = 0;
       }
     }
+    console.log('letterCounts = ', letterCounts);
     setKeyboardData(updatedKeyboardData);
     setCurrentMapValues(updatedMapValues);
   }
