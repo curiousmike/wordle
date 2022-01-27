@@ -215,9 +215,8 @@ function App() {
   }
   
   const handleCheat = () => {
-    console.log('cheat');
     setCheatCount(cheatCount + 1);
-    if (cheatCount + 1 > 3) {
+    if (cheatCount + 1 >= 3) {
       alert('word = ' + GlobalWordsToGuess[currentWordToGuessIndex]);
       setCheatCount(0);
     }
