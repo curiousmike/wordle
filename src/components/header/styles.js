@@ -1,4 +1,6 @@
-import styled from 'styled-components'
+import styled, {keyframes} from 'styled-components'
+import { bounce } from 'react-animations';
+const bounceAnimation = keyframes`${bounce}`;
 
 export const Container = styled.div`
   height: 7%;
@@ -14,6 +16,7 @@ align-self: center;
 font-size: 18px;
 font-weight: 800;
 margin-top: 2px;
+animation: 1s ${bounceAnimation};
 `;
 
 export const Subtitle = styled.div`

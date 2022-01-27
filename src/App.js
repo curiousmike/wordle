@@ -31,7 +31,7 @@ const appHeight = () => {
 window.addEventListener('resize', appHeight)
 appHeight();
 
-const doDebug = true;
+const doDebug = false; // true;
 
 function App() {
   const [currentRow, setCurrentRow] = useState(0);
