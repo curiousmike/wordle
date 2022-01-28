@@ -16,7 +16,7 @@ align-self: center;
 font-size: 18px;
 font-weight: 800;
 margin-top: 2px;
-animation: 1s ${bounceAnimation};
+animation: 1s ${props => props.animate ? bounceAnimation : '' };
 `;
 
 export const Subtitle = styled.div`

@@ -1,13 +1,12 @@
 import styled from 'styled-components'
 
 export const Container = styled.div`
-  height: 75%;
-  width: 100%;
-  background-color: lightgray;
-  color: green;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
+  position: fixed;
+  top: 10%;
+  color: white;
+  // display: flex;
+  // flex-direction: column;
+  // justify-content: center;
 `;
 
 export const Title = styled.div`

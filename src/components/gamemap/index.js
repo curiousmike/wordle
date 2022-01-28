@@ -1,6 +1,6 @@
 import { Container, LetterRow, LetterContainer } from './styles'
 
-function GameMap({data, column, row}) {
+function GameMap({data, column, row, isWrongGuess}) {
     const wordLength = 5;
     const totalTries = 6;
     let rowOfLetters = [];
@@ -9,7 +9,7 @@ function GameMap({data, column, row}) {
         for (let i = 0; i < wordLength; i++) {
             rowOfLetters.push(<LetterContainer key={i} isCurrent={i === column && j === row} highlightResult={data[j][i].result}>{data[j][i].value}</LetterContainer>);
         }
-        theRows.push(<LetterRow key={j}>{rowOfLetters}</LetterRow>);
+        theRows.push(<LetterRow key={j} isWrongGuess={isWrongGuess && j === row}>{rowOfLetters}</LetterRow>);
         rowOfLetters = [];
     }
     return (

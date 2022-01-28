@@ -24,6 +24,7 @@ const buildDefaultMap = () => {
   return map;
 }
 
+// This "appHeight" is the "fix" for iOS safari representing vh differently based on whether their footer is visible.
 const appHeight = () => {
     const doc = document.documentElement
     doc.style.setProperty('--app-height', `${window.innerHeight}px`)
@@ -44,6 +45,8 @@ function App() {
   const [currentWordToGuessIndex, setCurrentWordToGuessIndex] = useState(0);
   const [showInstructions, setShowInstructions] = useState(true);
   const [cheatCount, setCheatCount] = useState(0);
+  const [animateHeader, setAnimateHeader] = useState(false);
+  
   const GlobalWordsToGuess = doDebug ? ['beats'] : WordsToGuess;
   useEffect(() => {
     const value = readLevel();
@@ -104,6 +107,7 @@ function App() {
   );  
 
   const handleKey = (keyEvent) => {
+    setNotWord(false);
     if (isWinner) {
       handleClearWinner();
       return;
@@ -237,13 +241,19 @@ function App() {
       setCheatCount(0);
     }
   }
-  const showGameMap = !isWinner && !isLoser && !notWord && !showInstructions;
+
+  const clearInstructions = () => {
+    setShowInstructions(false);
+    setAnimateHeader(true);
+  }
+
+  const showGameMap = !isWinner && !isLoser && !showInstructions;
   const showKeyboard = !showInstructions;
   return (
     <Container>
-      <Header level={currentWordToGuessIndex} handleClick={() => handleCheat()}/>
-      {showGameMap && <GameMap data={currentMapValues} row={currentRow} column={currentColumn} />}
-      {showInstructions && <Instructions onClick={() => setShowInstructions(false)} />}
+      <Header animate={animateHeader} level={currentWordToGuessIndex} handleClick={() => handleCheat()}/>
+      {showGameMap && <GameMap data={currentMapValues} row={currentRow} column={currentColumn} isWrongGuess={notWord}/>}
+      {showInstructions && <Instructions onClick={() => clearInstructions()} />}
       {isWinner && <Winner onClick={()=>handleClearWinner()}/>}
       {isLoser && <Loser onClick={() => handleClearWinner()} />}
       {notWord && <NotWord word={notWord} onClick={()=>setNotWord(null)}/>}

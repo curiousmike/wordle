@@ -1,10 +1,10 @@
 import { Container, Title, Subtitle } from './styles'
 
-function Header({level, handleClick}) {
+function Header({level, handleClick, animate}) {
 
     return (
         <Container onClick={handleClick}>
-            <Title>
+            <Title animate={animate}>
                 Wordle Clone
             </Title>
             <Subtitle>
