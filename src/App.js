@@ -2,10 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import Header from './components/header';
 import GameMap from './components/gamemap';
 import Keyboard from './components/keyboard';
-import Winner from './components/winner';
-import Loser from './components/loser';
 import Instructions from './components/instructions';
-import NotWord from './components/notWord';
+import Alert from './components/alert';
 import { Container } from './styles';
 import { globalWordList } from "./globalWordList.js";
 import { readLevel, setLevel } from './storage';
@@ -32,7 +30,7 @@ const appHeight = () => {
 window.addEventListener('resize', appHeight)
 appHeight();
 
-const doDebug = true; // true;
+const doDebug = false; // true;
 
 function App() {
   const [currentRow, setCurrentRow] = useState(0);
@@ -184,6 +182,9 @@ function App() {
     }
     if (!isValid) {
       setNotWord(submittedWord);
+      setTimeout(() => {
+        setNotWord(null);
+      }, 1000);
     }
     return isValid;
   }
@@ -244,7 +245,6 @@ function App() {
         }
       }
     }
-    console.log('letterCounts = ', letterCounts);
     setKeyboardData(updatedKeyboardData);
     setCurrentMapValues(updatedMapValues);
   }
@@ -269,9 +269,9 @@ function App() {
       <Header animate={animateHeader} level={currentWordToGuessIndex} handleClick={() => handleCheat()}/>
       {showGameMap && <GameMap data={currentMapValues} row={currentRow} column={currentColumn} isWrongGuess={notWord}/>}
       {showInstructions && <Instructions onClick={() => clearInstructions()} />}
-      {isWinner && <Winner onClick={()=>handleClearWinner()}/>}
-      {isLoser && <Loser onClick={() => handleClearWinner()} />}
-      {notWord && <NotWord word={notWord} onClick={()=>setNotWord(null)}/>}
+      {isWinner && <Alert text={['Winner !']} onClick={()=>handleClearWinner()}/>}
+      {isLoser && <Alert text={ ['Sorry!', 'Try next word.']}onClick={() => handleClearWinner()} />}
+      {notWord &&  <Alert text={[notWord, 'is not a word']} onClick={()=>setNotWord(null)}/>}
       {!showInstructions && <Keyboard keyboardData={keyboardData} handleKeyPress={(e) => handleKey(e)} visible={showKeyboard} />}
     </Container>
   );
