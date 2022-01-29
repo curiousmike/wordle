@@ -8,7 +8,7 @@ export const Container = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items:center;
-  height: 75%;
+  height: 66%;
   width: 100%;
   background-color: black;
   color: white;
@@ -18,7 +18,7 @@ export const LetterRow = styled.div`
   display: flex;
   justify-content: center;
   width: 100%;
-  height: 7%;
+  height: 46px;
   margin-bottom: 8px;
   animation: 0.5s ${props => props.isWrongGuess ? headShakeAnimation : '' };
 `
@@ -32,7 +32,7 @@ outline-color: ${props => props.isCurrent ? 'LightBlue' : 'dimgrey'};
 animation: 0.05s ${props => props.isCurrent ? zoomInAnimation : '' };
 outline-width: 2px;
 background-color: ${props => props.highlightResult === 2 ? 'rgb(83, 141, 78)' : props.highlightResult === 1 ? 'rgb(181, 159, 59)' : props.highlightResult === 0 ? 'rgb(58, 58, 60)' : 'black'};
-min-width: 10%;
+width: 46px;
 height: 100%;
 margin: 8px;
 font-size: 18px;

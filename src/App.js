@@ -47,7 +47,9 @@ function App() {
   const [cheatCount, setCheatCount] = useState(0);
   const [animateHeader, setAnimateHeader] = useState(false);
   
-  const GlobalWordsToGuess = doDebug ? ['beats'] : WordsToGuess;
+  // waded / fazed - the D isn't shown correctly
+  // idled / added - two d's
+  const GlobalWordsToGuess = doDebug ? ['fazed'] : WordsToGuess; 
   useEffect(() => {
     const value = readLevel();
     if (value) {
@@ -211,22 +213,31 @@ function App() {
     const updatedMapValues = [...currentMapValues];
     let submittedWord = buildWordFromCurrentRow();
     const letterCounts = generateLetterCounts();
+    // do check for right letter in right column
     for (let column = 0; column < maxWordLength; column++) {
       const letterToCheck = submittedWord[column].toLowerCase();
-      const letterDone = (letterCounts[letterToCheck]?.used && letterCounts[letterToCheck].used >= letterCounts[letterToCheck].count);
-      if (!letterDone && letterToCheck === GlobalWordsToGuess[currentWordToGuessIndex][column]) {
+      if (letterToCheck === GlobalWordsToGuess[currentWordToGuessIndex][column]) {
         updatedMapValues[currentRow][column] = { value: currentMapValues[currentRow][column].value, result: 2 };
         updatedKeyboardData['key-' + letterToCheck] = 2;
         letterCounts[letterToCheck].used = letterCounts[letterToCheck].used ? letterCounts[letterToCheck].used + 1 : letterCounts[letterToCheck].used = 1;
-      } else if (!letterDone && doesLetterExistInWord(letterToCheck)) {
+      }
+    }
+    // do check for letter in word, but not in right spot
+    for (let column = 0; column < maxWordLength; column++) {
+      const letterToCheck = submittedWord[column].toLowerCase();
+      // console.log('letterToCheckCounts - ', letterToCheck, letterCounts[letterToCheck] ? letterCounts[letterToCheck].used : 'missing')
+      const letterDone = letterCounts[letterToCheck] ? letterCounts[letterToCheck].used === letterCounts[letterToCheck].count : false;
+      if (doesLetterExistInWord(letterToCheck) && !letterDone && !updatedMapValues[currentRow][column].result) {
         updatedMapValues[currentRow][column] = { value: currentMapValues[currentRow][column].value, result: 1 };
-        if (updatedKeyboardData['key-' + letterToCheck] !== 2) {
-          updatedKeyboardData['key-' + letterToCheck] = 1;
-          letterCounts[letterToCheck].used = letterCounts[letterToCheck].used ? letterCounts[letterToCheck].used + 1 : letterCounts[letterToCheck].used = 1;
-        }
-      } else {
+        updatedKeyboardData['key-' + letterToCheck] = 1;
+      }
+    }
+    // do check for letters that are not in word
+    for (let column = 0; column < maxWordLength; column++) {
+      const letterToCheck = submittedWord[column].toLowerCase();
+      if (!updatedMapValues[currentRow][column].result) {
         updatedMapValues[currentRow][column] = { value: currentMapValues[currentRow][column].value, result: 0 };
-        updatedKeyboardData['key-'+letterToCheck] = 0;
+        updatedKeyboardData['key-' + letterToCheck] = 0;
       }
     }
     console.log('letterCounts = ', letterCounts);
