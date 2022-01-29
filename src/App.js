@@ -32,7 +32,7 @@ const appHeight = () => {
 window.addEventListener('resize', appHeight)
 appHeight();
 
-const doDebug = false; // true;
+const doDebug = true; // true;
 
 function App() {
   const [currentRow, setCurrentRow] = useState(0);
@@ -49,7 +49,7 @@ function App() {
   
   // waded / fazed - the D isn't shown correctly
   // idled / added - two d's
-  const GlobalWordsToGuess = doDebug ? ['fazed'] : WordsToGuess; 
+  const GlobalWordsToGuess = doDebug ? ['haste'] : WordsToGuess; 
   useEffect(() => {
     const value = readLevel();
     if (value) {
@@ -229,7 +229,9 @@ function App() {
       const letterDone = letterCounts[letterToCheck] ? letterCounts[letterToCheck].used === letterCounts[letterToCheck].count : false;
       if (doesLetterExistInWord(letterToCheck) && !letterDone && !updatedMapValues[currentRow][column].result) {
         updatedMapValues[currentRow][column] = { value: currentMapValues[currentRow][column].value, result: 1 };
-        updatedKeyboardData['key-' + letterToCheck] = 1;
+        if (updatedKeyboardData['key-' + letterToCheck] !== 2) {
+          updatedKeyboardData['key-' + letterToCheck] = 1;
+        }
       }
     }
     // do check for letters that are not in word
@@ -237,7 +239,9 @@ function App() {
       const letterToCheck = submittedWord[column].toLowerCase();
       if (!updatedMapValues[currentRow][column].result) {
         updatedMapValues[currentRow][column] = { value: currentMapValues[currentRow][column].value, result: 0 };
-        updatedKeyboardData['key-' + letterToCheck] = 0;
+        if (updatedKeyboardData['key-' + letterToCheck] !== 1 && updatedKeyboardData['key-' + letterToCheck] !== 2) {
+          updatedKeyboardData['key-' + letterToCheck] = 0;
+        }
       }
     }
     console.log('letterCounts = ', letterCounts);

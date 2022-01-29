@@ -18,10 +18,14 @@ export const LetterRow = styled.div`
   display: flex;
   justify-content: center;
   width: 100%;
-  height: 46px;
+  height: 60px;
+  @media (max-width: 768px) {
+    height: 42px;
+  }
   margin-bottom: 8px;
   animation: 0.5s ${props => props.isWrongGuess ? headShakeAnimation : '' };
 `
+
 export const LetterContainer = styled.div`
 display: flex;
 flex-direction: column;
@@ -32,7 +36,11 @@ outline-color: ${props => props.isCurrent ? 'LightBlue' : 'dimgrey'};
 animation: 0.05s ${props => props.isCurrent ? zoomInAnimation : '' };
 outline-width: 2px;
 background-color: ${props => props.highlightResult === 2 ? 'rgb(83, 141, 78)' : props.highlightResult === 1 ? 'rgb(181, 159, 59)' : props.highlightResult === 0 ? 'rgb(58, 58, 60)' : 'black'};
-width: 46px;
+width: 60px;
+@media (max-width: 768px) {
+  width: 42px;
+}
+
 height: 100%;
 margin: 8px;
 font-size: 18px;
