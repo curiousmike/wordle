@@ -7,8 +7,8 @@ export const Container = styled.div`
   width: 100%;
   background-color: gray;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  flex-direction: row;
+  justify-content: space-between;;
 `;
 
 export const Title = styled.div`
@@ -24,5 +24,29 @@ align-self: center;
 font-size: 12px;
 font-weight: 400;
 color: lightgray;
-margin-bottom: 8px;
+margin: 0px 8px 8px 0px;
+`;
+
+export const HintContainer = styled.div`
+  align-self: center;
+  margin: 8px 8px 8px 8px;
+`;
+
+export const HintButton = styled.button`
+  display:inline-block;
+  padding:0.3em 1.2em;
+  margin:0 0.3em 0.3em 0;
+  border-radius:2em;
+  box-sizing: border-box;
+  text-decoration:none;
+  font-family:'Roboto',sans-serif;
+  font-weight:300;
+  color:#FFFFFF;
+  background-color:#4eb5f1;
+  text-align:center;
+  transition: all 0.2s;
+  &:disabled {
+    color: darkgray;
+    background-color: black;
+  }
 `;

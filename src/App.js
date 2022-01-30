@@ -42,8 +42,9 @@ function App() {
   const [notWord, setNotWord] = useState(null);
   const [currentWordToGuessIndex, setCurrentWordToGuessIndex] = useState(0);
   const [showInstructions, setShowInstructions] = useState(true);
-  const [cheatCount, setCheatCount] = useState(0);
+  const [isHintAvailable, setHintAvailable] = useState(true);
   const [animateHeader, setAnimateHeader] = useState(false);
+  const [currentHintStep, setCurrentHintStep] = useState(0);
   
   // waded / fazed - the D isn't shown correctly
   // idled / added - two d's
@@ -56,6 +57,8 @@ function App() {
   }, []); // empty second argument = "componentDidMount"
 
   const handleClearWinner = () => {
+    setCurrentHintStep(0);
+    setHintAvailable(true);
     setIsWinner(false);
     setIsLoser(false);
     setCurrentRow(0);
@@ -138,8 +141,10 @@ function App() {
           if (checkValidWord() && currentRow + 1 < maxRows) {
             checkValidLetters();
             setCurrentColumn(0);
-            // console.log('currentROW, nextROW = ', currentRow, currentRow + 1);
             setCurrentRow(currentRow + 1);
+            if (currentRow === 2 || currentRow === 4) {
+              setHintAvailable(true);
+            }
           }
         }
     }
@@ -249,27 +254,104 @@ function App() {
     setCurrentMapValues(updatedMapValues);
   }
   
-  const handleCheat = () => {
-    setCheatCount(cheatCount + 1);
-    if (cheatCount + 1 >= 3) {
-      alert('word = ' + GlobalWordsToGuess[currentWordToGuessIndex]);
-      setCheatCount(0);
-    }
-  }
 
   const clearInstructions = () => {
     setShowInstructions(false);
     setAnimateHeader(true);
   }
 
+  const hintRemoveKeys = () => {
+    const updatedKeyboardData = { ...keyboardData };
+    var characters = 'abcdefghijklmnopqrstuvwxyz';
+    let removedCharacterCount = 0;
+    let loopCount = 0;
+    console.log('removeKeys');
+    while (removedCharacterCount < 3 && loopCount < 20) {
+      const randomLetter = characters.charAt(Math.floor(Math.random() * characters.length));
+      if (!doesLetterExistInWord(randomLetter) && updatedKeyboardData['key-' + randomLetter] !== 2 && updatedKeyboardData['key-' + randomLetter]!==1 && updatedKeyboardData['key-' + randomLetter] !== 0) {
+        removedCharacterCount++;
+        updatedKeyboardData['key-' + randomLetter] = -1;
+      }
+      loopCount++;
+    }
+    console.log('removedCharacterCount = ', removedCharacterCount);
+    setKeyboardData(updatedKeyboardData);
+  }
+
+  const hintGiveKeys = () => {
+    const updatedKeyboardData = { ...keyboardData };
+    var characters = GlobalWordsToGuess[currentWordToGuessIndex];
+    let revealedCharacterCount = 0;
+    let loopCount = 0;
+    console.log('giveKeys');
+    while (revealedCharacterCount < 3 && loopCount < 20) {
+      const randomLetter = characters.charAt(Math.floor(Math.random() * characters.length));
+      if (doesLetterExistInWord(randomLetter) && updatedKeyboardData['key-' + randomLetter] !== 2 && updatedKeyboardData['key-' + randomLetter]!==1 && updatedKeyboardData['key-' + randomLetter] !== 0) {
+        revealedCharacterCount++;
+        updatedKeyboardData['key-' + randomLetter] = 3;
+      }
+      loopCount++;
+    }
+    console.log('hintGivekeys = ', revealedCharacterCount);
+    setKeyboardData(updatedKeyboardData);
+  }
+
+  const isLetterInCurrentRow = (letter) => {
+    for (let column = 0; column < maxWordLength; column++) {
+      if (currentMapValues[currentRow][column] === letter) {
+        return true;
+      }
+    }
+    return false;
+  }
+  const hintGiveLetterInLocation = () => {
+    const map = [...currentMapValues];
+    var characters = GlobalWordsToGuess[currentWordToGuessIndex];
+    let revealedCharacterCount = 0;
+    let loopCount = 0;
+    console.log('giveLetterInLocation');
+    while (revealedCharacterCount < 3 && loopCount < 20) {
+      const randCol = Math.floor(Math.random() * characters.length); 
+      const randomLetter = characters.charAt(randCol);
+      if (!isLetterInCurrentRow(randomLetter)) {
+        map[currentRow][randCol].value = randomLetter.toUpperCase();
+        map[currentRow][randCol].result = 3;
+        revealedCharacterCount++;
+      }
+      loopCount++;
+    }
+    console.log('giveLetterInLocation = ', revealedCharacterCount);
+    setCurrentMapValues(map);
+
+  }
+
+  const handleHint = () => {
+    console.log('word = ', GlobalWordsToGuess[currentWordToGuessIndex]);
+    if (isHintAvailable) {
+      if (currentHintStep === 0) {
+        hintRemoveKeys();
+      } else if (currentHintStep === 1) {
+        hintGiveKeys();
+      } else {
+        hintGiveLetterInLocation();
+      }
+      setCurrentHintStep(currentHintStep + 1);
+      setHintAvailable(false);
+    }
+  }
+
+  const getGrade = () => {
+    const grades = ['A', 'B', 'C', 'D'];
+    return `Grade ${grades[currentHintStep]}`;
+  }
   const showGameMap = !isWinner && !isLoser && !showInstructions;
   const showKeyboard = !showInstructions;
   return (
     <Container>
-      <Header animate={animateHeader} level={currentWordToGuessIndex} handleClick={() => handleCheat()}/>
+      <Header animate={animateHeader} level={currentWordToGuessIndex} isHintAvailable={isHintAvailable}  handleHint={() => handleHint()}/>
       {showGameMap && <GameMap data={currentMapValues} row={currentRow} column={currentColumn} isWrongGuess={notWord}/>}
       {showInstructions && <Instructions onClick={() => clearInstructions()} />}
-      {isWinner && <Alert text={['Winner !']} onClick={()=>handleClearWinner()}/>}
+      {isWinner && <Alert text={['Winner !', getGrade()]} onClick={()=>handleClearWinner()}/>}
       {isLoser && <Alert text={ ['Sorry!', 'Try next word.']}onClick={() => handleClearWinner()} />}
       {notWord &&  <Alert text={[notWord, 'is not a word']} onClick={()=>setNotWord(null)}/>}
       {!showInstructions && <Keyboard keyboardData={keyboardData} handleKeyPress={(e) => handleKey(e)} visible={showKeyboard} />}

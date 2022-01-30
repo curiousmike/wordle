@@ -1,9 +1,12 @@
-import { Container, Title, Subtitle } from './styles'
+import { Container, Title, Subtitle, HintContainer, HintButton } from './styles'
 
-function Header({level, handleClick, animate}) {
+function Header({level, animate, handleHint, isHintAvailable}) {
 
     return (
-        <Container onClick={handleClick}>
+        <Container>
+            <HintContainer>
+                <HintButton disabled={!isHintAvailable} onClick={() => handleHint()}>Hint</HintButton>
+            </HintContainer>
             <Title animate={animate}>
                 Wordle Clone
             </Title>
