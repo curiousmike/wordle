@@ -8,19 +8,9 @@ import { Container } from './styles';
 import { globalWordList } from "./globalWordList.js";
 import { readLevel, setLevel } from './storage';
 import { WordsToGuess } from './wordList';
-import { doesLetterExistInWord, maxRows, maxWordLength } from './utils';
+import { doesLetterExistInWord, maxRows, maxWordLength, buildDefaultMap } from './utils';
 import { hintRemoveKeys, hintGiveKeys, hintGiveLetterInLocation } from './hints';
 const backSpaceKey = '<=';
-const buildDefaultMap = () => {
-  const map = [];
-  for (let row = 0; row < maxRows; row++) {
-    map[row] = [];
-    for (let col = 0; col < maxWordLength; col++) {
-      map[row][col] = { value: '' };
-    }
-  }
-  return map;
-}
 
 // This "appHeight" is the "fix" for iOS safari representing vh differently based on whether their footer is visible.
 const appHeight = () => {
@@ -30,7 +20,6 @@ const appHeight = () => {
 window.addEventListener('resize', appHeight)
 appHeight();
 
-const doDebug = false; //true; // true;
 
 function App() {
   const [currentRow, setCurrentRow] = useState(0);
@@ -46,10 +35,12 @@ function App() {
   const [animateHeader, setAnimateHeader] = useState(false);
   const [currentHintStep, setCurrentHintStep] = useState(0);
   
+
   // waded / fazed - the D isn't shown correctly
   // idled / added - two d's
   // reset / haste - two e's
-
+  // eerie / verse - test word
+  const doDebug = false; // true;
   const GlobalWordsToGuess = doDebug ? ['haste'] : WordsToGuess; 
   useEffect(() => {
     const value = readLevel();
@@ -225,10 +216,10 @@ function App() {
     // do check for letter in word, but not in right spot
     for (let column = 0; column < maxWordLength; column++) {
       const letterToCheck = submittedWord[column].toLowerCase();
-      // console.log('letterToCheckCounts - ', letterToCheck, letterCounts[letterToCheck] ? letterCounts[letterToCheck].used : 'missing')
       const letterDone = letterCounts[letterToCheck] ? letterCounts[letterToCheck].used === letterCounts[letterToCheck].count : false;
       if (doesLetterExistInWord(GlobalWordsToGuess[currentWordToGuessIndex], letterToCheck) && !letterDone && !updatedMapValues[currentRow][column].result) {
         updatedMapValues[currentRow][column] = { value: currentMapValues[currentRow][column].value, result: 1 };
+        letterCounts[letterToCheck].used ? letterCounts[letterToCheck].used++ : letterCounts[letterToCheck].used = 1;
         if (updatedKeyboardData['key-' + letterToCheck] !== 2) {
           updatedKeyboardData['key-' + letterToCheck] = 1;
         }

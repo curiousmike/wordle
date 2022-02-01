@@ -9,3 +9,14 @@ export const doesLetterExistInWord = (word, letter) => {
     }
     return false;
   }
+
+export const buildDefaultMap = () => {
+  const map = [];
+  for (let row = 0; row < maxRows; row++) {
+    map[row] = [];
+    for (let col = 0; col < maxWordLength; col++) {
+      map[row][col] = { value: '' };
+    }
+  }
+  return map;
+}
