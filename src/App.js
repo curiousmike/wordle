@@ -6,7 +6,7 @@ import Instructions from './components/instructions';
 import Alert from './components/alert';
 import { Container } from './styles';
 import { globalWordList } from "./globalWordList.js";
-import { readLevel, setLevel } from './storage';
+import { readLevel, setLevel, readGameState, saveGameState } from './storage';
 import { WordsToGuess } from './wordList';
 import { doesLetterExistInWord, maxRows, maxWordLength, buildDefaultMap } from './utils';
 import { hintRemoveKeys, hintGiveKeys, hintGiveLetterInLocation } from './hints';
@@ -43,9 +43,16 @@ function App() {
   const doDebug = false; // true;
   const GlobalWordsToGuess = doDebug ? ['haste'] : WordsToGuess; 
   useEffect(() => {
-    const value = readLevel();
-    if (value) {
-      setCurrentWordToGuessIndex(doDebug ? 0 : value);
+    const level = readLevel();
+    if (level) {
+      setCurrentWordToGuessIndex(doDebug ? 0 : level);
+    }
+
+    const gameState = readGameState();
+    if (gameState) {
+      setCurrentMapValues(gameState.map);
+      setKeyboardData(gameState.keyboard);
+      setCurrentRow(gameState.row);
     }
   }, []); // empty second argument = "componentDidMount"
 
@@ -101,6 +108,10 @@ function App() {
     },
     [] // Re-run if eventName or element changes
   );  
+
+  useEffect(() => {
+    saveGameState(currentMapValues, keyboardData, currentRow);
+  }, [currentMapValues, keyboardData, currentRow]);
 
   const handleKey = (keyEvent) => {
     setNotWord(false);
