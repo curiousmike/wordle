@@ -50,9 +50,21 @@ function App() {
 
     const gameState = readGameState();
     if (gameState) {
+      console.log('gameState = ', gameState);
       setCurrentMapValues(gameState.map);
       setKeyboardData(gameState.keyboard);
       setCurrentRow(gameState.row);
+      setHintAvailable(false);
+      setCurrentHintStep(gameState.hintStep);
+      if (gameState.hintStep === 0) {
+        setHintAvailable(true);
+      }
+      if ( (gameState.row >= 2 && gameState.row <= 4) && gameState.hintStep === 1) {
+          setHintAvailable(true);
+      }
+      if ( (gameState.row >= 4 ) && gameState.hintStep <= 2) {
+          setHintAvailable(true);
+      }
     }
   }, []); // empty second argument = "componentDidMount"
 
@@ -110,8 +122,8 @@ function App() {
   );  
 
   useEffect(() => {
-    saveGameState(currentMapValues, keyboardData, currentRow);
-  }, [currentMapValues, keyboardData, currentRow]);
+    saveGameState(currentMapValues, keyboardData, currentRow, currentHintStep);
+  }, [currentMapValues, keyboardData, currentRow, currentHintStep]);
 
   const handleKey = (keyEvent) => {
     setNotWord(false);

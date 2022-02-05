@@ -8,6 +8,8 @@ export const Container = styled.div`
   width: 100%;
   background-color: black;
   border-top: 2px solid #7777;
+  --webkit-user-select: none;
+  user-select: none;
 `;
 
 export const KeyboardRow = styled.div`
