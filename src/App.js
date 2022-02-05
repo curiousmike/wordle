@@ -157,6 +157,10 @@ function App() {
           if (checkValidWord() && currentRow + 1 < maxRows) {
             checkValidLetters();
             setCurrentColumn(0);
+            for (let i = 0; i < maxWordLength; i++) {
+              map[currentRow][i].reveal = 1;
+            }
+            setCurrentMapValues(map);
             setCurrentRow(currentRow + 1);
             if (currentRow === 2 || currentRow === 4) {
               setHintAvailable(true);

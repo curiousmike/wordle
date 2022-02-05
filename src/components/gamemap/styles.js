@@ -1,7 +1,8 @@
 import styled, {keyframes} from 'styled-components'
-import { zoomIn, headShake } from 'react-animations';
+import { zoomIn, headShake, flipInY } from 'react-animations';
 const zoomInAnimation = keyframes`${zoomIn}`;
 const headShakeAnimation = keyframes`${headShake}`;
+const flipInYAnimation = keyframes`${flipInY}`;
 
 export const Container = styled.div`
   display: flex;
@@ -34,6 +35,7 @@ align-items: center;
 outline-style: solid;
 outline-color: ${props => props.isCurrent ? 'LightBlue' : 'dimgrey'};
 animation: 0.05s ${props => props.isCurrent ? zoomInAnimation : '' };
+animation: 1.5s ${props => props.reveal ? flipInYAnimation : ''};
 outline-width: 2px;
 background-color: ${props => props.highlightResult >= 2 ? 'rgb(83, 141, 78)' : props.highlightResult === 1 ? 'rgb(181, 159, 59)' : props.highlightResult === 0 ? 'rgb(58, 58, 60)' : 'black'};
 outline-color: ${props => props.highlightResult === 3 ? 'red' : ''};
