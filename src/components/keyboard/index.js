@@ -1,6 +1,5 @@
 import { Container, KeyboardRow } from './styles'
 import SingleKey from '../singlekey';
-import { keyboard } from '@testing-library/user-event/dist/keyboard';
 const KeyboardRows = [
     [
         'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P',

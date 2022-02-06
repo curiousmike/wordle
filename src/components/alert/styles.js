@@ -6,7 +6,7 @@ export const Container = styled.div`
   min-height: 30%;
   min-width: 30%;
   color: lightgray;
-  background-color: gray;
+  background-color: rgba(128, 128, 128, 0.95);
   padding: 8px;
   // outline: 2px solid red;
   outline: 3px solid #007AFF;
@@ -15,11 +15,12 @@ export const Container = styled.div`
   flex-direction: column;
   justify-content: center;
   overflow: hidden;
-`;
+  -webkit-text-stroke-width: 1px;
+  -webkit-text-stroke-color: black;`;
 
 export const Title = styled.div`
 align-self: center;
-font-size: 18px;
+font-size: 24px;
 font-weight: 800;
 `;
 

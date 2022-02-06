@@ -8,7 +8,7 @@ import { Container } from './styles';
 import { globalWordList } from "./globalWordList.js";
 import { readLevel, setLevel, readGameState, saveGameState } from './storage';
 import { WordsToGuess } from './wordList';
-import { doesLetterExistInWord, maxRows, maxWordLength, buildDefaultMap } from './utils';
+import { doesLetterExistInWord, maxRows, maxWordLength, buildDefaultMap, keyboardConstants } from './utils';
 import { hintRemoveKeys, hintGiveKeys, hintGiveLetterInLocation } from './hints';
 const backSpaceKey = '<=';
 
@@ -50,7 +50,6 @@ function App() {
 
     const gameState = readGameState();
     if (gameState) {
-      console.log('gameState = ', gameState);
       setCurrentMapValues(gameState.map);
       setKeyboardData(gameState.keyboard);
       setCurrentRow(gameState.row);
@@ -85,17 +84,17 @@ function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleKeyPress = (e) => {
     if (notWord) {
-      if (e.key === 'Escape' || e.key === 'Enter') {
+      if (e.key === keyboardConstants.ESCAPE || e.key === keyboardConstants.ENTER) {
         setNotWord(null);
         return;
       }
     }
     if (isWinner) {
-      if (e.key === 'Escape' || e.key === 'Enter') {
+      if (e.key === keyboardConstants.ESCAPE || e.key === keyboardConstants.ENTER) {
         handleClearWinner();
       }
     } else {
-      if (e.key === 'Backspace') {
+      if (e.key === keyboardConstants.BACKSPACE) {
         handleKey('<=');
       } else {
         handleKey(e.key.toUpperCase());
@@ -131,6 +130,7 @@ function App() {
       handleClearWinner();
       return;
     }
+    // console.log('keyEvent = ', keyEvent, keyboardConstants.ENTER);
     const map = [...currentMapValues];
     if (keyEvent === backSpaceKey) {
       if (currentColumn > 0) {
@@ -143,30 +143,8 @@ function App() {
         }
         setCurrentMapValues(map);
       }
-    } else
-      if (keyEvent === 'ENTER' || keyEvent === 'GO') {
-        if (map[currentRow][currentColumn].value !== '' && currentColumn === maxWordLength - 1) {
-          if (checkWinnerWord()) {
-            setIsWinner(true);
-            return;
-          }
-          if (checkIsLoser()) {
-            setIsLoser(true);
-            return;
-          }
-          if (checkValidWord() && currentRow + 1 < maxRows) {
-            checkValidLetters();
-            setCurrentColumn(0);
-            for (let i = 0; i < maxWordLength; i++) {
-              map[currentRow][i].reveal = 1;
-            }
-            setCurrentMapValues(map);
-            setCurrentRow(currentRow + 1);
-            if (currentRow === 2 || currentRow === 4) {
-              setHintAvailable(true);
-            }
-          }
-        }
+    } else if (keyEvent === keyboardConstants.ENTER || keyEvent === 'GO') {
+        handleNextRow();
     }
     else if (keyEvent.length === 1 && keyEvent >= 'A' && keyEvent <= 'Z') {
       map[currentRow][currentColumn].value = keyEvent;
@@ -174,6 +152,42 @@ function App() {
       if (currentColumn + 1 < maxWordLength) {
         setCurrentColumn(currentColumn + 1);
       }
+    }
+  }
+
+  const handleNextRow = () => {
+    const revealTime = 100;
+    const map = [...currentMapValues];
+    if (map[currentRow][currentColumn].value !== '' && currentColumn === maxWordLength - 1) {
+      if (checkValidWord()) {
+        for (let i = 0; i < maxWordLength; i++) {
+          setTimeout(() => revealLetter(currentRow, i), i * revealTime);
+        }
+        setTimeout(() => finalizeNextRow(), revealTime * maxWordLength);
+      }
+    }
+  }
+
+  const revealLetter = (row, col) => {
+    checkLetterColumnCorrectness(row, col);
+    const map = [...currentMapValues];
+    map[row][col].reveal = 1;
+    setCurrentMapValues(map);
+  }
+
+  const finalizeNextRow = () => {
+    if (checkWinnerWord()) {
+      setIsWinner(true);
+      return;
+    }
+    if (checkIsLoser()) {
+      setIsLoser(true);
+      return;
+    }
+    setCurrentColumn(0);
+    setCurrentRow(currentRow + 1);
+    if (currentRow === 2 || currentRow === 4) {
+      setHintAvailable(true);
     }
   }
 
@@ -226,43 +240,40 @@ function App() {
     });
     return counts;
   }
-  const checkValidLetters = () => {
-    const updatedKeyboardData = { ...keyboardData };
+
+  const checkLetterColumnCorrectness = (r, c) => {
+    const updatedKeyboardData = {};
     const updatedMapValues = [...currentMapValues];
     let submittedWord = buildWordFromCurrentRow();
     const letterCounts = generateLetterCounts();
+    
     // do check for right letter in right column
-    for (let column = 0; column < maxWordLength; column++) {
-      const letterToCheck = submittedWord[column].toLowerCase();
-      if (letterToCheck === GlobalWordsToGuess[currentWordToGuessIndex][column]) {
-        updatedMapValues[currentRow][column] = { value: currentMapValues[currentRow][column].value, result: 2 };
-        updatedKeyboardData['key-' + letterToCheck] = 2;
-        letterCounts[letterToCheck].used = letterCounts[letterToCheck].used ? letterCounts[letterToCheck].used + 1 : letterCounts[letterToCheck].used = 1;
-      }
+    const letterToCheck = submittedWord[c].toLowerCase();
+    if (letterToCheck === GlobalWordsToGuess[currentWordToGuessIndex][c]) {
+      updatedMapValues[r][c] = { value: currentMapValues[r][c].value, result: 2 };
+      updatedKeyboardData['key-' + letterToCheck] = 2;
+      letterCounts[letterToCheck].used = letterCounts[letterToCheck].used ? letterCounts[letterToCheck].used + 1 : letterCounts[letterToCheck].used = 1;
     }
+
     // do check for letter in word, but not in right spot
-    for (let column = 0; column < maxWordLength; column++) {
-      const letterToCheck = submittedWord[column].toLowerCase();
-      const letterDone = letterCounts[letterToCheck] ? letterCounts[letterToCheck].used === letterCounts[letterToCheck].count : false;
-      if (doesLetterExistInWord(GlobalWordsToGuess[currentWordToGuessIndex], letterToCheck) && !letterDone && !updatedMapValues[currentRow][column].result) {
-        updatedMapValues[currentRow][column] = { value: currentMapValues[currentRow][column].value, result: 1 };
-        letterCounts[letterToCheck].used ? letterCounts[letterToCheck].used++ : letterCounts[letterToCheck].used = 1;
-        if (updatedKeyboardData['key-' + letterToCheck] !== 2) {
-          updatedKeyboardData['key-' + letterToCheck] = 1;
-        }
+    const letterDone = letterCounts[letterToCheck] ? letterCounts[letterToCheck].used === letterCounts[letterToCheck].count : false;
+    if (doesLetterExistInWord(GlobalWordsToGuess[currentWordToGuessIndex], letterToCheck) && !letterDone && !updatedMapValues[r][c].result) {
+      updatedMapValues[r][c] = { value: currentMapValues[r][c].value, result: 1 };
+      letterCounts[letterToCheck].used ? letterCounts[letterToCheck].used++ : letterCounts[letterToCheck].used = 1;
+      if (updatedKeyboardData['key-' + letterToCheck] !== 2) {
+        updatedKeyboardData['key-' + letterToCheck] = 1;
       }
     }
+
     // do check for letters that are not in word
-    for (let column = 0; column < maxWordLength; column++) {
-      const letterToCheck = submittedWord[column].toLowerCase();
-      if (!updatedMapValues[currentRow][column].result) {
-        updatedMapValues[currentRow][column] = { value: currentMapValues[currentRow][column].value, result: 0 };
-        if (updatedKeyboardData['key-' + letterToCheck] !== 1 && updatedKeyboardData['key-' + letterToCheck] !== 2) {
-          updatedKeyboardData['key-' + letterToCheck] = 0;
-        }
+    if (!updatedMapValues[r][c].result) {
+      updatedMapValues[r][c] = { value: currentMapValues[r][c].value, result: 0 };
+      if (updatedKeyboardData['key-' + letterToCheck] !== 1 && updatedKeyboardData['key-' + letterToCheck] !== 2) {
+        updatedKeyboardData['key-' + letterToCheck] = 0;
       }
     }
-    setKeyboardData(updatedKeyboardData);
+
+    setKeyboardData((prev) => ({ ...prev, ...updatedKeyboardData }));
     setCurrentMapValues(updatedMapValues);
   }
   
@@ -294,14 +305,15 @@ function App() {
     const grades = ['A', 'B', 'C', 'D'];
     return `Grade ${grades[currentHintStep]}`;
   }
-  const showGameMap = !isWinner && !isLoser && !showInstructions;
+  const showGameMap =  !showInstructions;
   const showKeyboard = !showInstructions;
+  // console.log('keyboardData RENDER = ', keyboardData);
   return (
     <Container>
       <Header animate={animateHeader} level={currentWordToGuessIndex} isHintAvailable={!showInstructions && isHintAvailable}  handleHint={() => handleHint()}/>
-      {showGameMap && <GameMap data={currentMapValues} row={currentRow} column={currentColumn} isWrongGuess={notWord}/>}
+      {!showInstructions && <GameMap show={showGameMap} data={currentMapValues} row={currentRow} column={currentColumn} isWrongGuess={notWord}/>}
       {showInstructions && <Instructions onClick={() => clearInstructions()} />}
-      {isWinner && <Alert text={['Winner !', getGrade()]} onClick={()=>handleClearWinner()}/>}
+      {isWinner && <Alert text={['Winner !', GlobalWordsToGuess[currentWordToGuessIndex], getGrade()]} onClick={()=>handleClearWinner()}/>}
       {isLoser && <Alert text={ ['Sorry!', 'Try next word.']}onClick={() => handleClearWinner()} />}
       {notWord &&  <Alert text={[notWord, 'is not a word']} onClick={()=>setNotWord(null)}/>}
       {!showInstructions && <Keyboard keyboardData={keyboardData} handleKeyPress={(e) => handleKey(e)} visible={showKeyboard} />}

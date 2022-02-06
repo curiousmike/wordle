@@ -1,6 +1,6 @@
 import { Container, LetterRow, LetterContainer } from './styles'
 
-function GameMap({data, column, row, isWrongGuess}) {
+function GameMap({show, data, column, row, isWrongGuess}) {
     const wordLength = 5;
     const totalTries = 6;
     let rowOfLetters = [];
@@ -14,7 +14,7 @@ function GameMap({data, column, row, isWrongGuess}) {
     }
     return (
         <Container>
-            {theRows}
+            {show && theRows}
       </Container>
   );
 }

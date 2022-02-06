@@ -1,5 +1,6 @@
 export const maxWordLength = 5;
 export const maxRows = 6;
+export const keyboardConstants = { ENTER: 'ENTER', ESCAPE: 'ESCAPE', BACKSPACE: 'Backspace' };
 
 export const doesLetterExistInWord = (word, letter) => {
     for (let column = 0; column < word.length; column++) {
