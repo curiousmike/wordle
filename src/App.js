@@ -40,8 +40,9 @@ function App() {
   // idled / added - two d's
   // reset / haste - two e's
   // eerie / verse - test word
+  // abyss / atlas - two a's
   const doDebug = false; // true;
-  const GlobalWordsToGuess = doDebug ? ['haste'] : WordsToGuess; 
+  const GlobalWordsToGuess = doDebug ? ['reset'] : WordsToGuess; 
   useEffect(() => {
     const level = readLevel();
     if (level) {
@@ -256,7 +257,13 @@ function App() {
     }
 
     // do check for letter in word, but not in right spot
-    const letterDone = letterCounts[letterToCheck] ? letterCounts[letterToCheck].used === letterCounts[letterToCheck].count : false;
+    let letterDone = false; // letterCounts[letterToCheck] ? letterCounts[letterToCheck].used === letterCounts[letterToCheck].count : false;
+    for (let i = 0; i <= c; i++) {
+        if (updatedMapValues[r][i].value === letterToCheck.toUpperCase() && updatedMapValues[r][i].result === 2) {
+          letterDone = true;
+          break;
+        }
+    }
     if (doesLetterExistInWord(GlobalWordsToGuess[currentWordToGuessIndex], letterToCheck) && !letterDone && !updatedMapValues[r][c].result) {
       updatedMapValues[r][c] = { value: currentMapValues[r][c].value, result: 1 };
       letterCounts[letterToCheck].used ? letterCounts[letterToCheck].used++ : letterCounts[letterToCheck].used = 1;
@@ -274,7 +281,7 @@ function App() {
     }
 
     setKeyboardData((prev) => ({ ...prev, ...updatedKeyboardData }));
-    setCurrentMapValues(updatedMapValues);
+    setCurrentMapValues((prev) => ( {...prev, ...updatedMapValues}));
   }
   
 
