@@ -43,7 +43,7 @@ function App() {
   // eerie / verse - test word
   // abyss / atlas - two a's
   // haste / taste 
-  const doDebug = true; // true;
+  const doDebug = false; // true;
   const GlobalWordsToGuess = doDebug ? ['haste'] : WordsToGuess; 
   useEffect(() => {
     const level = readLevel();
