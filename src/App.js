@@ -25,6 +25,7 @@ function App() {
   const [currentRow, setCurrentRow] = useState(0);
   const [currentColumn, setCurrentColumn] = useState(0);
   const [currentMapValues, setCurrentMapValues] = useState(buildDefaultMap());
+  const [preMapValues, setPreMapValues] = useState(buildDefaultMap());
   const [isWinner, setIsWinner] = useState(false);
   const [isLoser, setIsLoser] = useState(false);
   const [keyboardData, setKeyboardData] = useState({});
@@ -41,8 +42,9 @@ function App() {
   // reset / haste - two e's
   // eerie / verse - test word
   // abyss / atlas - two a's
-  const doDebug = false; // true;
-  const GlobalWordsToGuess = doDebug ? ['reset'] : WordsToGuess; 
+  // haste / taste 
+  const doDebug = true; // true;
+  const GlobalWordsToGuess = doDebug ? ['haste'] : WordsToGuess; 
   useEffect(() => {
     const level = readLevel();
     if (level) {
@@ -161,6 +163,7 @@ function App() {
     const map = [...currentMapValues];
     if (map[currentRow][currentColumn].value !== '' && currentColumn === maxWordLength - 1) {
       if (checkValidWord()) {
+        checkValidLetters();
         for (let i = 0; i < maxWordLength; i++) {
           setTimeout(() => revealLetter(currentRow, i), i * revealTime);
         }
@@ -242,43 +245,47 @@ function App() {
     return counts;
   }
 
+  const checkValidLetters = () => {
+    const updatedMapValues = [...preMapValues];
+    let submittedWord = buildWordFromCurrentRow();
+    const letterCounts = generateLetterCounts();
+    // do check for right letter in right column
+    for (let column = 0; column < maxWordLength; column++) {
+      const letterToCheck = submittedWord[column].toLowerCase();
+      if (letterToCheck === GlobalWordsToGuess[currentWordToGuessIndex][column]) {
+        updatedMapValues[currentRow][column] = { value: currentMapValues[currentRow][column].value, result: 2 };
+        letterCounts[letterToCheck].used = letterCounts[letterToCheck].used ? letterCounts[letterToCheck].used + 1 : letterCounts[letterToCheck].used = 1;
+      }
+    }
+    // do check for letter in word, but not in right spot
+    for (let column = 0; column < maxWordLength; column++) {
+      const letterToCheck = submittedWord[column].toLowerCase();
+      const letterDone = letterCounts[letterToCheck] ? letterCounts[letterToCheck].used === letterCounts[letterToCheck].count : false;
+      if (doesLetterExistInWord(GlobalWordsToGuess[currentWordToGuessIndex], letterToCheck) && !letterDone && !updatedMapValues[currentRow][column].result) {
+        updatedMapValues[currentRow][column] = { value: currentMapValues[currentRow][column].value, result: 1 };
+        letterCounts[letterToCheck].used ? letterCounts[letterToCheck].used++ : letterCounts[letterToCheck].used = 1;
+      }
+    }
+    // do check for letters that are not in word
+    for (let column = 0; column < maxWordLength; column++) {
+      const letterToCheck = submittedWord[column].toLowerCase();
+      if (!updatedMapValues[currentRow][column].result) {
+        updatedMapValues[currentRow][column] = { value: currentMapValues[currentRow][column].value, result: 0 };
+      }
+    }
+    setPreMapValues(updatedMapValues);
+  }
+
   const checkLetterColumnCorrectness = (r, c) => {
     const updatedKeyboardData = {};
     const updatedMapValues = [...currentMapValues];
     let submittedWord = buildWordFromCurrentRow();
-    const letterCounts = generateLetterCounts();
     
+    console.log('currentMapValues = ', currentMapValues);
     // do check for right letter in right column
     const letterToCheck = submittedWord[c].toLowerCase();
-    if (letterToCheck === GlobalWordsToGuess[currentWordToGuessIndex][c]) {
-      updatedMapValues[r][c] = { value: currentMapValues[r][c].value, result: 2 };
-      updatedKeyboardData['key-' + letterToCheck] = 2;
-      letterCounts[letterToCheck].used = letterCounts[letterToCheck].used ? letterCounts[letterToCheck].used + 1 : letterCounts[letterToCheck].used = 1;
-    }
-
-    // do check for letter in word, but not in right spot
-    let letterDone = false; // letterCounts[letterToCheck] ? letterCounts[letterToCheck].used === letterCounts[letterToCheck].count : false;
-    for (let i = 0; i <= c; i++) {
-        if (updatedMapValues[r][i].value === letterToCheck.toUpperCase() && updatedMapValues[r][i].result === 2) {
-          letterDone = true;
-          break;
-        }
-    }
-    if (doesLetterExistInWord(GlobalWordsToGuess[currentWordToGuessIndex], letterToCheck) && !letterDone && !updatedMapValues[r][c].result) {
-      updatedMapValues[r][c] = { value: currentMapValues[r][c].value, result: 1 };
-      letterCounts[letterToCheck].used ? letterCounts[letterToCheck].used++ : letterCounts[letterToCheck].used = 1;
-      if (updatedKeyboardData['key-' + letterToCheck] !== 2) {
-        updatedKeyboardData['key-' + letterToCheck] = 1;
-      }
-    }
-
-    // do check for letters that are not in word
-    if (!updatedMapValues[r][c].result) {
-      updatedMapValues[r][c] = { value: currentMapValues[r][c].value, result: 0 };
-      if (updatedKeyboardData['key-' + letterToCheck] !== 1 && updatedKeyboardData['key-' + letterToCheck] !== 2) {
-        updatedKeyboardData['key-' + letterToCheck] = 0;
-      }
-    }
+    updatedMapValues[r][c] = preMapValues[r][c];
+    updatedKeyboardData['key-' + letterToCheck] = preMapValues[r][c].result;
 
     setKeyboardData((prev) => ({ ...prev, ...updatedKeyboardData }));
     setCurrentMapValues((prev) => ( {...prev, ...updatedMapValues}));
