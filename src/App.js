@@ -70,7 +70,7 @@ function App() {
     }
   }, []); // empty second argument = "componentDidMount"
 
-  const handleClearWinner = () => {
+  const handleResetGame = () => {
     setCurrentHintStep(0);
     setHintAvailable(true);
     setIsWinner(false);
@@ -96,7 +96,7 @@ function App() {
     }
     if (isWinner) {
       if (e.key === keyboardConstants.ESCAPE || e.key === keyboardConstants.ENTER) {
-        handleClearWinner();
+        handleResetGame();
       }
     } else {
       if (e.key === keyboardConstants.BACKSPACE) {
@@ -132,7 +132,7 @@ function App() {
   const handleKey = (keyEvent) => {
     setNotWord(false);
     if (isWinner) {
-      handleClearWinner();
+      handleResetGame();
       return;
     }
     // console.log('keyEvent = ', keyEvent, keyboardConstants.ENTER);
@@ -329,8 +329,8 @@ function App() {
       <Header animate={animateHeader} level={currentWordToGuessIndex} isHintAvailable={!showInstructions && isHintAvailable}  handleHint={() => handleHint()}/>
       {!showInstructions && <GameMap show={showGameMap} data={currentMapValues} row={currentRow} column={currentColumn} isWrongGuess={notWord}/>}
       {showInstructions && <Instructions onClick={() => clearInstructions()} />}
-      {isWinner && <Alert text={['Winner !', GlobalWordsToGuess[currentWordToGuessIndex], getGrade()]} onClick={()=>handleClearWinner()}/>}
-      {isLoser && <Alert text={ ['Sorry!', 'Try next word.']}onClick={() => handleClearWinner()} />}
+      {isWinner && <Alert text={['Winner !', GlobalWordsToGuess[currentWordToGuessIndex], getGrade()]} onClick={()=>handleResetGame()}/>}
+      {isLoser && <Alert text={ ['Sorry!', 'Try next word.']}onClick={() => handleResetGame()} />}
       {notWord &&  <Alert text={[notWord, 'is not a word']} onClick={()=>setNotWord(null)}/>}
       {!showInstructions && <Keyboard keyboardData={keyboardData} handleKeyPress={(e) => handleKey(e)} visible={showKeyboard} />}
     </Container>
