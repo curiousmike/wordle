@@ -79,6 +79,8 @@ function App() {
     setCurrentColumn(0);
     const blankMap = buildDefaultMap();
     setCurrentMapValues(blankMap);
+    const preMap = buildDefaultMap();
+    setPreMapValues(preMap);
     setKeyboardData({});
     setCurrentWordToGuessIndex(currentWordToGuessIndex + 1);
     setLevel(currentWordToGuessIndex + 1);
