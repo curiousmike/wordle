@@ -11,7 +11,7 @@ import { WordsToGuess } from './wordList';
 import { doesLetterExistInWord, maxRows, maxWordLength, buildDefaultMap, keyboardConstants } from './utils';
 import { hintRemoveKeys, hintGiveKeys, hintGiveLetterInLocation } from './hints';
 const backSpaceKey = '<=';
-
+let winnerAnimTimeoutID = null;
 // This "appHeight" is the "fix" for iOS safari representing vh differently based on whether their footer is visible.
 const appHeight = () => {
     const doc = document.documentElement
@@ -27,6 +27,9 @@ function App() {
   const [currentMapValues, setCurrentMapValues] = useState(buildDefaultMap());
   const [preMapValues, setPreMapValues] = useState(buildDefaultMap());
   const [isWinner, setIsWinner] = useState(false);
+  const [isWinnerAnim, setWinnerAnim] = useState(false);
+  const [currentStreak, setCurrentStreak] = useState(0);
+  const [longestStreak, setLongestStreak] = useState(0);
   const [isLoser, setIsLoser] = useState(false);
   const [keyboardData, setKeyboardData] = useState({});
   const [notWord, setNotWord] = useState(null);
@@ -44,7 +47,7 @@ function App() {
   // abyss / atlas - two a's
   // haste / taste 
   const doDebug = false; // true;
-  const GlobalWordsToGuess = doDebug ? ['haste'] : WordsToGuess; 
+  const GlobalWordsToGuess = doDebug ? ['fazed'] : WordsToGuess; 
   useEffect(() => {
     const level = readLevel();
     if (level) {
@@ -58,6 +61,8 @@ function App() {
       setCurrentRow(gameState.row);
       setHintAvailable(false);
       setCurrentHintStep(gameState.hintStep);
+      setCurrentStreak(gameState.currentStreak ? gameState.currentStreak : 0);
+      setLongestStreak(gameState.longestStreak ? gameState.longestStreak : 0);
       if (gameState.hintStep === 0) {
         setHintAvailable(true);
       }
@@ -71,6 +76,7 @@ function App() {
   }, []); // empty second argument = "componentDidMount"
 
   const handleResetGame = () => {
+    setWinnerAnim(false);
     setCurrentHintStep(0);
     setHintAvailable(true);
     setIsWinner(false);
@@ -88,21 +94,24 @@ function App() {
   
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleKeyPress = (e) => {
+    const key = e.key.toUpperCase();
     if (notWord) {
-      if (e.key === keyboardConstants.ESCAPE || e.key === keyboardConstants.ENTER) {
+      if (key === keyboardConstants.ESCAPE || key === keyboardConstants.ENTER) {
         setNotWord(null);
         return;
       }
+      return;
     }
     if (isWinner) {
-      if (e.key === keyboardConstants.ESCAPE || e.key === keyboardConstants.ENTER) {
+      if (key === keyboardConstants.ESCAPE || key === keyboardConstants.ENTER) {
+        clearTimeout(winnerAnimTimeoutID);
         handleResetGame();
       }
-    } else {
-      if (e.key === keyboardConstants.BACKSPACE) {
+    } else if (!isWinnerAnim) {
+      if (key === keyboardConstants.BACKSPACE) {
         handleKey('<=');
       } else {
-        handleKey(e.key.toUpperCase());
+        handleKey(key);
       }
     }
   }
@@ -126,16 +135,16 @@ function App() {
   );  
 
   useEffect(() => {
-    saveGameState(currentMapValues, keyboardData, currentRow, currentHintStep);
-  }, [currentMapValues, keyboardData, currentRow, currentHintStep]);
+    saveGameState(currentMapValues, keyboardData, currentRow, currentHintStep, longestStreak, currentStreak);
+  }, [currentMapValues, keyboardData, currentRow, currentHintStep, longestStreak, currentStreak]);
 
   const handleKey = (keyEvent) => {
     setNotWord(false);
     if (isWinner) {
+      clearTimeout(winnerAnimTimeoutID);
       handleResetGame();
       return;
     }
-    // console.log('keyEvent = ', keyEvent, keyboardConstants.ENTER);
     const map = [...currentMapValues];
     if (keyEvent === backSpaceKey) {
       if (currentColumn > 0) {
@@ -175,19 +184,36 @@ function App() {
   }
 
   const revealLetter = (row, col) => {
-    checkLetterColumnCorrectness(row, col);
+    copyLetterIntoFinalMap(row, col);
     const map = [...currentMapValues];
-    map[row][col].reveal = 1;
+    if (checkWinnerWord()) {
+      map[row][col].winnerReveal = 1;  
+    } else {
+      map[row][col].reveal = 1;
+    }
     setCurrentMapValues(map);
   }
 
   const finalizeNextRow = () => {
     if (checkWinnerWord()) {
-      setIsWinner(true);
+      setWinnerAnim(true);
+      setCurrentStreak(currentStreak + 1);
+      if (currentStreak + 1 > longestStreak) {
+        setLongestStreak(longestStreak + 1);
+      }
+      setTimeout(() => {
+        setIsWinner(true);
+        winnerAnimTimeoutID = setTimeout(() => {
+          handleResetGame();
+        }, 3000)
+      }, 1500);
       return;
     }
     if (checkIsLoser()) {
-      setIsLoser(true);
+      setCurrentStreak(0);
+      setTimeout(() => {
+        setIsLoser(true);
+      }, 1000);
       return;
     }
     setCurrentColumn(0);
@@ -195,6 +221,23 @@ function App() {
     if (currentRow === 2 || currentRow === 4) {
       setHintAvailable(true);
     }
+    updateKeyboardValues();
+  }
+
+  const updateKeyboardValues = () => {
+    const updatedKeyboardData = { ...keyboardData };
+    for (let col = 0; col < maxWordLength; col++) {
+      const colValue = currentMapValues[currentRow][col];
+      const key = colValue.value.toLowerCase();
+      if (updatedKeyboardData['key-' + key]) {
+        if (updatedKeyboardData['key-' + key] < colValue.result) {
+          updatedKeyboardData['key-' + key] = colValue.result;          
+        }
+      } else {
+        updatedKeyboardData['key-' + key] = colValue.result;
+      }
+    }
+    setKeyboardData(updatedKeyboardData);
   }
 
   const buildWordFromCurrentRow = () => {
@@ -215,6 +258,7 @@ function App() {
       return true;
     }
   }
+
   const checkValidWord = () => {
     let submittedWord = buildWordFromCurrentRow();
     submittedWord = submittedWord.toLowerCase();
@@ -270,7 +314,6 @@ function App() {
     }
     // do check for letters that are not in word
     for (let column = 0; column < maxWordLength; column++) {
-      const letterToCheck = submittedWord[column].toLowerCase();
       if (!updatedMapValues[currentRow][column].result) {
         updatedMapValues[currentRow][column] = { value: currentMapValues[currentRow][column].value, result: 0 };
       }
@@ -278,18 +321,9 @@ function App() {
     setPreMapValues(updatedMapValues);
   }
 
-  const checkLetterColumnCorrectness = (r, c) => {
-    const updatedKeyboardData = {};
+  const copyLetterIntoFinalMap = (r, c) => {
     const updatedMapValues = [...currentMapValues];
-    let submittedWord = buildWordFromCurrentRow();
-    
-    console.log('currentMapValues = ', currentMapValues);
-    // do check for right letter in right column
-    const letterToCheck = submittedWord[c].toLowerCase();
     updatedMapValues[r][c] = preMapValues[r][c];
-    updatedKeyboardData['key-' + letterToCheck] = preMapValues[r][c].result;
-
-    setKeyboardData((prev) => ({ ...prev, ...updatedKeyboardData }));
     setCurrentMapValues((prev) => ( {...prev, ...updatedMapValues}));
   }
   
@@ -329,8 +363,8 @@ function App() {
       <Header animate={animateHeader} level={currentWordToGuessIndex} isHintAvailable={!showInstructions && isHintAvailable}  handleHint={() => handleHint()}/>
       {!showInstructions && <GameMap show={showGameMap} data={currentMapValues} row={currentRow} column={currentColumn} isWrongGuess={notWord}/>}
       {showInstructions && <Instructions onClick={() => clearInstructions()} />}
-      {isWinner && <Alert text={['Winner !', GlobalWordsToGuess[currentWordToGuessIndex], getGrade()]} onClick={()=>handleResetGame()}/>}
-      {isLoser && <Alert text={ ['Sorry!', 'Try next word.']}onClick={() => handleResetGame()} />}
+      {isWinner && <Alert text={['Winner !', GlobalWordsToGuess[currentWordToGuessIndex], getGrade(), `Current streak ${currentStreak}`, `Longest Streak ${longestStreak}`]} onClick={()=>handleResetGame()}/>}
+      {isLoser && <Alert text={ ['Sorry!', 'Try next word.', `Current streak ${currentStreak}`, `Longest Streak ${longestStreak}`]}onClick={() => handleResetGame()} />}
       {notWord &&  <Alert text={[notWord, 'is not a word']} onClick={()=>setNotWord(null)}/>}
       {!showInstructions && <Keyboard keyboardData={keyboardData} handleKeyPress={(e) => handleKey(e)} visible={showKeyboard} />}
     </Container>

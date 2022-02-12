@@ -1,9 +1,8 @@
 import styled, {keyframes} from 'styled-components'
-import { zoomIn, headShake, flipInY } from 'react-animations';
-const zoomInAnimation = keyframes`${zoomIn}`;
+import { pulse, headShake, flipInY } from 'react-animations';
+const pulseAnimation = keyframes`${pulse}`;
 const headShakeAnimation = keyframes`${headShake}`;
 const flipInYAnimation = keyframes`${flipInY}`;
-
 export const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -34,8 +33,7 @@ justify-content: center;
 align-items: center;
 outline-style: solid;
 outline-color: ${props => props.isCurrent ? 'LightBlue' : 'dimgrey'};
-animation: 0.05s ${props => props.isCurrent ? zoomInAnimation : '' };
-animation: 1.5s ${props => props.reveal ? flipInYAnimation : ''};
+animation: ${props => props.reveal ? '1.5s' : props.winnerReveal ? 'infinite 0.5s': ''} ${props => props.reveal ? flipInYAnimation : props.winnerReveal ? pulseAnimation: ''};
 outline-width: 2px;
 background-color: ${props => props.highlightResult >= 2 ? 'rgb(83, 141, 78)' : props.highlightResult === 1 ? 'rgb(181, 159, 59)' : props.highlightResult === 0 ? 'rgb(58, 58, 60)' : 'black'};
 outline-color: ${props => props.highlightResult === 3 ? 'red' : ''};
@@ -49,3 +47,4 @@ margin: 8px;
 font-size: 18px;
 font-weight: 800;
 `
+

@@ -18,8 +18,15 @@ export const readGameState = () => {
     return null;
 }
 
-export const saveGameState = (currentMapValues, keyboardData, currentRow, hint) => {
-    const gameState = JSON.stringify({ map: currentMapValues, keyboard: keyboardData, row: currentRow, hintStep: hint });
+export const saveGameState = (currentMapValues, keyboardData, currentRow, hint, longestStreak, currentStreak) => {
+    const gameState = JSON.stringify({
+        map: currentMapValues,
+        keyboard: keyboardData,
+        row: currentRow,
+        hintStep: hint,
+        longestStreak: longestStreak,
+        currentStreak: currentStreak,
+    });
     return window.localStorage.setItem('gameState', gameState);
 }
 

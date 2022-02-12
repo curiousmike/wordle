@@ -7,7 +7,7 @@ function GameMap({show, data, column, row, isWrongGuess}) {
     const theRows = [];
     for (let j = 0; j < totalTries; j++) {
         for (let i = 0; i < wordLength; i++) {
-            rowOfLetters.push(<LetterContainer reveal={data[j][i].reveal === 1} key={i} isCurrent={i === column && j === row} highlightResult={data[j][i].result}>{data[j][i].value}</LetterContainer>);
+            rowOfLetters.push(<LetterContainer reveal={data[j][i].reveal === 1} winnerReveal={data[j][i].winnerReveal === 1} key={i} isCurrent={i === column && j === row} highlightResult={data[j][i].result}>{data[j][i].value}</LetterContainer>);
         }
         theRows.push(<LetterRow key={j} isWrongGuess={isWrongGuess && j === row}>{rowOfLetters}</LetterRow>);
         rowOfLetters = [];

@@ -3,7 +3,7 @@ import styled from 'styled-components'
 export const Container = styled.div`
   position: fixed;
   top: 20%;
-  min-height: 30%;
+  min-height: 15%;
   min-width: 30%;
   color: lightgray;
   background-color: rgba(128, 128, 128, 0.95);
@@ -15,8 +15,8 @@ export const Container = styled.div`
   flex-direction: column;
   justify-content: center;
   overflow: hidden;
-  -webkit-text-stroke-width: 1px;
-  -webkit-text-stroke-color: black;`;
+text-shadow: 1px 1px #444444;
+  `;
 
 export const Title = styled.div`
 align-self: center;
