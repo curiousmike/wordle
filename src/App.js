@@ -47,7 +47,7 @@ function App() {
   // abyss / atlas - two a's
   // haste / taste 
   const doDebug = false; // true;
-  const GlobalWordsToGuess = doDebug ? ['fazed'] : WordsToGuess; 
+  const GlobalWordsToGuess = doDebug ? ['donor'] : WordsToGuess; 
   useEffect(() => {
     const level = readLevel();
     if (level) {
@@ -158,7 +158,7 @@ function App() {
         setCurrentMapValues(map);
       }
     } else if (keyEvent === keyboardConstants.ENTER || keyEvent === 'GO') {
-        handleNextRow();
+        handleGoingToNextRow();
     }
     else if (keyEvent.length === 1 && keyEvent >= 'A' && keyEvent <= 'Z') {
       map[currentRow][currentColumn].value = keyEvent;
@@ -169,7 +169,7 @@ function App() {
     }
   }
 
-  const handleNextRow = () => {
+  const handleGoingToNextRow = () => {
     const revealTime = 100;
     const map = [...currentMapValues];
     if (map[currentRow][currentColumn].value !== '' && currentColumn === maxWordLength - 1) {
@@ -334,7 +334,6 @@ function App() {
   }
   
   const handleHint = () => {
-    console.log('word = ', GlobalWordsToGuess[currentWordToGuessIndex]);
     if (isHintAvailable) {
       if (currentHintStep === 0) {
         const updatedKeyboardData = hintRemoveKeys(GlobalWordsToGuess[currentWordToGuessIndex], keyboardData);
@@ -357,16 +356,40 @@ function App() {
   }
   const showGameMap =  !showInstructions;
   const showKeyboard = !showInstructions;
-  // console.log('keyboardData RENDER = ', keyboardData);
+
   return (
     <Container>
-      <Header animate={animateHeader} level={currentWordToGuessIndex} isHintAvailable={!showInstructions && isHintAvailable}  handleHint={() => handleHint()}/>
-      {!showInstructions && <GameMap show={showGameMap} data={currentMapValues} row={currentRow} column={currentColumn} isWrongGuess={notWord}/>}
-      {showInstructions && <Instructions onClick={() => clearInstructions()} />}
-      {isWinner && <Alert text={['Winner !', GlobalWordsToGuess[currentWordToGuessIndex], getGrade(), `Current streak ${currentStreak}`, `Longest Streak ${longestStreak}`]} onClick={()=>handleResetGame()}/>}
-      {isLoser && <Alert text={ ['Sorry!', 'Try next word.', `Current streak ${currentStreak}`, `Longest Streak ${longestStreak}`]}onClick={() => handleResetGame()} />}
-      {notWord &&  <Alert text={[notWord, 'is not a word']} onClick={()=>setNotWord(null)}/>}
-      {!showInstructions && <Keyboard keyboardData={keyboardData} handleKeyPress={(e) => handleKey(e)} visible={showKeyboard} />}
+      <Header
+        animate={animateHeader}
+        level={currentWordToGuessIndex}
+        isHintAvailable={!showInstructions && isHintAvailable}
+        handleHint={() => handleHint()} />
+      {!showInstructions &&
+        <GameMap
+          show={showGameMap}
+          data={currentMapValues}
+          row={currentRow}
+          column={currentColumn}
+          isWrongGuess={notWord} />}
+      {showInstructions &&
+        <Instructions onClick={() => clearInstructions()} />}
+      {isWinner &&
+        <Alert
+          text={['Winner !', GlobalWordsToGuess[currentWordToGuessIndex], getGrade(), `Current streak ${currentStreak}`, `Longest Streak ${longestStreak}`]}
+          onClick={() => handleResetGame()} />}
+      {isLoser &&
+        <Alert
+          text={['Sorry!', 'Try next word.', `Current streak ${currentStreak}`, `Longest Streak ${longestStreak}`]}
+          onClick={() => handleResetGame()} />}
+      {notWord &&
+        <Alert
+          text={[notWord, 'is not a word']}
+          onClick={() => setNotWord(null)} />}
+      {!showInstructions &&
+        <Keyboard
+          keyboardData={keyboardData}
+          handleKeyPress={(e) => handleKey(e)}
+          visible={showKeyboard} />}
     </Container>
   );
 }
