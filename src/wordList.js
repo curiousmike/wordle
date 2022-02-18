@@ -195,4 +195,8 @@ export const WordsToGuess =  ["biked",
     "olive",
     "allow",
     "aloft",
+    "robot",
+    "cynic",
+    "knoll",
+    "rogue",
 ];

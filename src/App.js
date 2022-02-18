@@ -88,8 +88,12 @@ function App() {
     const preMap = buildDefaultMap();
     setPreMapValues(preMap);
     setKeyboardData({});
-    setCurrentWordToGuessIndex(currentWordToGuessIndex + 1);
-    setLevel(currentWordToGuessIndex + 1);
+    if (currentWordToGuessIndex + 1 < WordsToGuess.length) {
+      setCurrentWordToGuessIndex(currentWordToGuessIndex + 1);
+      setLevel(currentWordToGuessIndex + 1);
+    } else {
+      alert('no more words - email me me if you see this curiousmike@gmail.com');
+    }
   }
   
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -370,7 +374,8 @@ function App() {
           data={currentMapValues}
           row={currentRow}
           column={currentColumn}
-          isWrongGuess={notWord} />}
+          isWrongGuess={notWord}
+          />}
       {showInstructions &&
         <Instructions onClick={() => clearInstructions()} />}
       {isWinner &&

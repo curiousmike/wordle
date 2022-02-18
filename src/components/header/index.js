@@ -8,7 +8,7 @@ function Header({level, animate, handleHint, isHintAvailable}) {
                 <HintButton disabled={!isHintAvailable} onClick={() => handleHint()}>Hint</HintButton>
             </HintContainer>
             <Title animate={animate}>
-                Wordle Clone
+                Wordle Practice
             </Title>
             <Subtitle>
                 Level {level + 1}
