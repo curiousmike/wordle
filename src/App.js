@@ -6,7 +6,7 @@ import Instructions from './components/instructions';
 import Alert from './components/alert';
 import { Container } from './styles';
 import { globalWordList } from "./globalWordList.js";
-import { readLevel, setLevel, readGameState, saveGameState } from './storage';
+import { readLevel, setLevel, readGameState, saveGameState, saveGameResult } from './storage';
 import { WordsToGuess } from './wordList';
 import { doesLetterExistInWord, maxRows, maxWordLength, buildDefaultMap, keyboardConstants } from './utils';
 import { hintRemoveKeys, hintGiveKeys, hintGiveLetterInLocation } from './hints';
@@ -76,6 +76,8 @@ function App() {
   }, []); // empty second argument = "componentDidMount"
 
   const handleResetGame = () => {
+    console.log('resetGame');
+    saveGameResult(currentMapValues, currentWordToGuessIndex);
     setWinnerAnim(false);
     setCurrentHintStep(0);
     setHintAvailable(true);

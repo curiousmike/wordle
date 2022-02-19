@@ -30,3 +30,33 @@ export const saveGameState = (currentMapValues, keyboardData, currentRow, hint, 
     return window.localStorage.setItem('gameState', gameState);
 }
 
+export const saveGameResult = (gameData, index) => {
+    const gameResult = JSON.stringify({
+        map: gameData,
+    });
+
+    const currentResultIndices = window.localStorage.getItem('resultIndices');
+    if (currentResultIndices) {
+        const indices = JSON.parse(currentResultIndices);
+        let bExists = false;
+        for (let i = 0; i < indices.length; i++){
+            if (indices[i] === index) {
+                bExists = true;
+                console.log('already exists');
+            }
+        }
+        if (!bExists) {
+            indices.push(index);
+            const newIndices = JSON.stringify(indices);
+            window.localStorage.setItem('resultIndices', newIndices);
+        }
+    } else {
+        const indices = [];
+        indices.push(index);
+        const newIndices = JSON.stringify(indices);
+        window.localStorage.setItem('resultIndices', newIndices);
+    }
+    return window.localStorage.setItem(`gameResult${index}`, gameResult);
+
+}
+
