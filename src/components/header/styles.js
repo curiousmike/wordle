@@ -25,11 +25,23 @@ font-size: 12px;
 font-weight: 400;
 color: lightgray;
 margin: 0px 8px 8px 0px;
+padding-right: 8px;
+`;
+
+export const LeftContainer = styled.div`
+  display: flex;
+  align-self: center;
+  margin: 8px 8px 8px 8px;
 `;
 
 export const HintContainer = styled.div`
   align-self: center;
-  margin: 8px 8px 8px 8px;
+`;
+
+export const OptionsContainer = styled.div`
+  align-self: center;
+  margin-left: 8px;
+  width: 24px;
 `;
 
 export const HintButton = styled.button`

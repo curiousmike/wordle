@@ -8,7 +8,7 @@ export const hintRemoveKeys = (word, keyboardData) => {
     console.log('removeKeys');
     while (removedCharacterCount < 3 && loopCount < 20) {
       const randomLetter = characters.charAt(Math.floor(Math.random() * characters.length));
-      if (!doesLetterExistInWord(word, randomLetter) && updatedKeyboardData['key-' + randomLetter] !== 2 && updatedKeyboardData['key-' + randomLetter]!==1 && updatedKeyboardData['key-' + randomLetter] !== 0) {
+      if (!doesLetterExistInWord(word, randomLetter) && updatedKeyboardData['key-' + randomLetter] !== 2 && updatedKeyboardData['key-' + randomLetter]!==1 && updatedKeyboardData['key-' + randomLetter] !== 0 && updatedKeyboardData['key-' + randomLetter] !== -1) {
         removedCharacterCount++;
         updatedKeyboardData['key-' + randomLetter] = -1;
       }

@@ -4,6 +4,7 @@ import GameMap from './components/gamemap';
 import Keyboard from './components/keyboard';
 import Instructions from './components/instructions';
 import Alert from './components/alert';
+import Options from './components/options';
 import { Container } from './styles';
 import { globalWordList } from "./globalWordList.js";
 import { readLevel, setLevel, readGameState, saveGameState, saveGameResult } from './storage';
@@ -38,6 +39,7 @@ function App() {
   const [isHintAvailable, setHintAvailable] = useState(true);
   const [animateHeader, setAnimateHeader] = useState(false);
   const [currentHintStep, setCurrentHintStep] = useState(0);
+  const [showOptions, setShowOptions] = useState(false);
   
 
   // waded / fazed - the D isn't shown correctly
@@ -369,7 +371,11 @@ function App() {
         animate={animateHeader}
         level={currentWordToGuessIndex}
         isHintAvailable={!showInstructions && isHintAvailable}
+        handleOptions={()=>setShowOptions(true)}
         handleHint={() => handleHint()} />
+      {showOptions &&
+        <Options text={['options']} onClick={()=>setShowOptions(false)}/>
+      }
       {!showInstructions &&
         <GameMap
           show={showGameMap}

@@ -1,12 +1,16 @@
-import { Container, Title, Subtitle, HintContainer, HintButton } from './styles'
+import { Container, LeftContainer, Title, Subtitle, HintContainer, HintButton, OptionsContainer } from './styles'
+import gear_icon from '../../images/gear.svg';
 
-function Header({level, animate, handleHint, isHintAvailable}) {
+function Header({level, animate, handleHint, isHintAvailable, handleOptions}) {
 
     return (
         <Container>
-            <HintContainer>
-                <HintButton disabled={!isHintAvailable} onClick={() => handleHint()}>Hint</HintButton>
-            </HintContainer>
+            <LeftContainer>
+                <HintContainer>
+                    <HintButton disabled={!isHintAvailable} onClick={() => handleHint()}>Hint</HintButton>
+                </HintContainer>
+                <OptionsContainer><img alt="Options" src={gear_icon} onClick={() => handleOptions()}/></OptionsContainer>
+            </LeftContainer>
             <Title animate={animate}>
                 Wordle Practice
             </Title>
