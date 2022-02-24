@@ -7,7 +7,7 @@ import Alert from './components/alert';
 import Options from './components/options';
 import { Container } from './styles';
 import { globalWordList } from "./globalWordList.js";
-import { readLevel, setLevel, readGameState, saveGameState, saveGameResult } from './storage';
+import { readLevel, setLevel, readGameState, saveGameState, saveGameResult, loadGameResultIndices } from './storage';
 import { WordsToGuess } from './wordList';
 import { doesLetterExistInWord, maxRows, maxWordLength, buildDefaultMap, keyboardConstants } from './utils';
 import { hintRemoveKeys, hintGiveKeys, hintGiveLetterInLocation } from './hints';
@@ -40,7 +40,8 @@ function App() {
   const [animateHeader, setAnimateHeader] = useState(false);
   const [currentHintStep, setCurrentHintStep] = useState(0);
   const [showOptions, setShowOptions] = useState(false);
-  
+  const [gameResultIndices, setGameResultIndices] = useState(null);
+  const [isReplay, setIsReplay] = useState(false);
 
   // waded / fazed - the D isn't shown correctly
   // idled / added - two d's
@@ -48,9 +49,12 @@ function App() {
   // eerie / verse - test word
   // abyss / atlas - two a's
   // haste / taste 
+  // erase / speed - two e's
   const doDebug = false; // true;
-  const GlobalWordsToGuess = doDebug ? ['donor'] : WordsToGuess; 
+  const GlobalWordsToGuess = doDebug ? ['erase'] : WordsToGuess; 
   useEffect(() => {
+    const gameResultIndices = loadGameResultIndices();
+    setGameResultIndices(gameResultIndices);
     const level = readLevel();
     if (level) {
       setCurrentWordToGuessIndex(doDebug ? 0 : level);
@@ -358,12 +362,16 @@ function App() {
     }
   }
 
+  const handleReplay = () => {
+    setIsReplay(true);
+  }
+
   const getGrade = () => {
     const grades = ['A', 'B', 'C', 'D'];
     return `Grade ${grades[currentHintStep]}`;
   }
-  const showGameMap =  !showInstructions;
-  const showKeyboard = !showInstructions;
+  const showGameMap =  !showInstructions && !isReplay;
+  const showKeyboard = !showInstructions && !showOptions;
 
   return (
     <Container>
@@ -374,9 +382,12 @@ function App() {
         handleOptions={()=>setShowOptions(true)}
         handleHint={() => handleHint()} />
       {showOptions &&
-        <Options text={['options']} onClick={()=>setShowOptions(false)}/>
+        <Options text={['options']} onClick={() => setShowOptions(false)} handleReplay={() => handleReplay()}/>
       }
-      {!showInstructions &&
+      {isReplay &&
+        <Alert text={['Replay mode on', `Total Results ${gameResultIndices.length}`]} onClick={() => setIsReplay(false)}/>
+      }
+      {(!showInstructions && !showOptions) &&
         <GameMap
           show={showGameMap}
           data={currentMapValues}

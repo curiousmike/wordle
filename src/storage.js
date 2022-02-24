@@ -60,3 +60,11 @@ export const saveGameResult = (gameData, index) => {
 
 }
 
+export const loadGameResultIndices = () => {
+    const indices = window.localStorage.getItem('resultIndices');
+    if (indices) {
+        return JSON.parse(indices);
+    }
+    return null;
+
+}
