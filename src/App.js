@@ -7,7 +7,7 @@ import Alert from './components/alert';
 import Options from './components/options';
 import { Container } from './styles';
 import { globalWordList } from "./globalWordList.js";
-import { readLevel, setLevel, readGameState, saveGameState, saveGameResult, loadGameResultIndices } from './storage';
+import { readLevel, setLevel, readGameState, saveGameState, saveGameResult, loadGameResultIndices, loadGameResult } from './storage';
 import { WordsToGuess } from './wordList';
 import { doesLetterExistInWord, maxRows, maxWordLength, buildDefaultMap, keyboardConstants } from './utils';
 import { hintRemoveKeys, hintGiveKeys, hintGiveLetterInLocation } from './hints';
@@ -41,7 +41,7 @@ function App() {
   const [currentHintStep, setCurrentHintStep] = useState(0);
   const [showOptions, setShowOptions] = useState(false);
   const [gameResultIndices, setGameResultIndices] = useState(null);
-  const [isReplay, setIsReplay] = useState(false);
+  const [replayIndex, setReplayIndex] = useState(null);
 
   // waded / fazed - the D isn't shown correctly
   // idled / added - two d's
@@ -53,8 +53,10 @@ function App() {
   const doDebug = false; // true;
   const GlobalWordsToGuess = doDebug ? ['erase'] : WordsToGuess; 
   useEffect(() => {
+    setHintAvailable(false);
     const gameResultIndices = loadGameResultIndices();
     setGameResultIndices(gameResultIndices);
+    console.log('gameIndices ', gameResultIndices);
     const level = readLevel();
     if (level) {
       setCurrentWordToGuessIndex(doDebug ? 0 : level);
@@ -65,7 +67,6 @@ function App() {
       setCurrentMapValues(gameState.map);
       setKeyboardData(gameState.keyboard);
       setCurrentRow(gameState.row);
-      setHintAvailable(false);
       setCurrentHintStep(gameState.hintStep);
       setCurrentStreak(gameState.currentStreak ? gameState.currentStreak : 0);
       setLongestStreak(gameState.longestStreak ? gameState.longestStreak : 0);
@@ -104,53 +105,22 @@ function App() {
     }
   }
   
+  // Keyboard click
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleKeyPress = (e) => {
+    if (replayIndex !== null) return;
     const key = e.key.toUpperCase();
-    if (notWord) {
-      if (key === keyboardConstants.ESCAPE || key === keyboardConstants.ENTER) {
-        setNotWord(null);
-        return;
-      }
-      return;
-    }
-    if (isWinner) {
-      if (key === keyboardConstants.ESCAPE || key === keyboardConstants.ENTER) {
-        clearTimeout(winnerAnimTimeoutID);
-        handleResetGame();
-      }
-    } else if (!isWinnerAnim) {
-      if (key === keyboardConstants.BACKSPACE) {
-        handleKey('<=');
-      } else {
-        handleKey(key);
-      }
+    if (key === keyboardConstants.BACKSPACE) {
+      handleKey('<=');
+    } else {
+      handleKey(key);
     }
   }
-  
-  const savedHandler = useRef();
-  useEffect(() => {
-    savedHandler.current = handleKeyPress;
-  }, [handleKeyPress]);
 
-  useEffect(
-    () => {
-      const isSupported = document && document.addEventListener;
-      if (!isSupported) return;
-      const eventListener = event => savedHandler.current(event);
-      document.addEventListener('keydown', eventListener);
-      return () => {
-        document.removeEventListener('keydown', eventListener);
-      };
-    },
-    [] // Re-run if eventName or element changes
-  );  
-
-  useEffect(() => {
-    saveGameState(currentMapValues, keyboardData, currentRow, currentHintStep, longestStreak, currentStreak);
-  }, [currentMapValues, keyboardData, currentRow, currentHintStep, longestStreak, currentStreak]);
-
+  // Direct mouse click on keyboard AND keyboard click
   const handleKey = (keyEvent) => {
+    if (replayIndex !== null || isWinnerAnim) return;
+
     setNotWord(false);
     if (isWinner) {
       clearTimeout(winnerAnimTimeoutID);
@@ -181,6 +151,29 @@ function App() {
     }
   }
 
+  const savedHandler = useRef();
+  useEffect(() => {
+    savedHandler.current = handleKeyPress;
+  }, [handleKeyPress]);
+ 
+  useEffect(
+    () => {
+      const isSupported = document && document.addEventListener;
+      if (!isSupported) return;
+      const eventListener = event => savedHandler.current(event);
+      document.addEventListener('keydown', eventListener);
+      return () => {
+        document.removeEventListener('keydown', eventListener);
+      };
+    },
+    [] // Re-run if eventName or element changes
+  );  
+
+  useEffect(() => {
+    saveGameState(currentMapValues, keyboardData, currentRow, currentHintStep, longestStreak, currentStreak);
+  }, [currentMapValues, keyboardData, currentRow, currentHintStep, longestStreak, currentStreak]);
+
+  
   const handleGoingToNextRow = () => {
     const revealTime = 100;
     const map = [...currentMapValues];
@@ -363,14 +356,17 @@ function App() {
   }
 
   const handleReplay = () => {
-    setIsReplay(true);
+    setReplayIndex(0);
+    const data = loadGameResult(0);
+    console.log('data = ', data);
+    setCurrentMapValues(data.map);
   }
 
   const getGrade = () => {
     const grades = ['A', 'B', 'C', 'D'];
     return `Grade ${grades[currentHintStep]}`;
   }
-  const showGameMap =  !showInstructions && !isReplay;
+  const showGameMap =  !showInstructions && !replayIndex;
   const showKeyboard = !showInstructions && !showOptions;
 
   return (
@@ -379,13 +375,12 @@ function App() {
         animate={animateHeader}
         level={currentWordToGuessIndex}
         isHintAvailable={!showInstructions && isHintAvailable}
+        replayIndex={replayIndex}
+        clearReplay={() => setReplayIndex(null)}
         handleOptions={()=>setShowOptions(true)}
         handleHint={() => handleHint()} />
       {showOptions &&
-        <Options text={['options']} onClick={() => setShowOptions(false)} handleReplay={() => handleReplay()}/>
-      }
-      {isReplay &&
-        <Alert text={['Replay mode on', `Total Results ${gameResultIndices.length}`]} onClick={() => setIsReplay(false)}/>
+        <Options text={['options']} onClick={() => setShowOptions(false)} handleReplay={() => handleReplay()} />
       }
       {(!showInstructions && !showOptions) &&
         <GameMap

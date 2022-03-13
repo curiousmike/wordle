@@ -68,3 +68,9 @@ export const loadGameResultIndices = () => {
     return null;
 
 }
+
+export const loadGameResult = (index) => {
+    const fileName = `gameResult${index}`;
+    const result = window.localStorage.getItem(fileName);
+    return JSON.parse(result);
+}

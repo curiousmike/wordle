@@ -1,15 +1,16 @@
 import { Container, LeftContainer, Title, Subtitle, HintContainer, HintButton, OptionsContainer } from './styles'
 import gear_icon from '../../images/gear.svg';
 
-function Header({level, animate, handleHint, isHintAvailable, handleOptions}) {
+function Header({level, animate, handleHint, isHintAvailable, replayIndex, handleOptions, clearReplay}) {
 
     return (
         <Container>
             <LeftContainer>
                 <HintContainer>
-                    <HintButton disabled={!isHintAvailable} onClick={() => handleHint()}>Hint</HintButton>
+                    <HintButton disabled={!isHintAvailable || replayIndex !== null} onClick={() => handleHint()}>Hint</HintButton>
                 </HintContainer>
-                <OptionsContainer><img alt="Options" src={gear_icon} onClick={() => handleOptions()}/></OptionsContainer>
+                {replayIndex === null && <OptionsContainer><img alt="Options" src={gear_icon} onClick={() => handleOptions()} /></OptionsContainer>}
+                {replayIndex !== null && <HintButton onClick={() => clearReplay(false)}>Stop Replay {replayIndex + 1}</HintButton>}
             </LeftContainer>
             <Title animate={animate}>
                 Wordle Practice

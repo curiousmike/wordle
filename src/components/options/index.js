@@ -10,7 +10,7 @@ function Options({onClick, handleReplay}) {
                 Review past games
             </Body>
             <Footer>
-                Questions or comments ->
+                Questions or comments --
                 <Email href="mailto:curiousmike@gmail.com"> curiousmike@gmail.com</Email>
             </Footer>
       </Container>
