@@ -42,7 +42,6 @@ export const saveGameResult = (gameData, index) => {
         for (let i = 0; i < indices.length; i++){
             if (indices[i] === index) {
                 bExists = true;
-                console.log('already exists');
             }
         }
         if (!bExists) {

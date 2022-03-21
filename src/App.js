@@ -26,6 +26,7 @@ function App() {
   const [currentRow, setCurrentRow] = useState(0);
   const [currentColumn, setCurrentColumn] = useState(0);
   const [currentMapValues, setCurrentMapValues] = useState(buildDefaultMap());
+  const [storedMapValues, storeMapValues] = useState([]);
   const [preMapValues, setPreMapValues] = useState(buildDefaultMap());
   const [isWinner, setIsWinner] = useState(false);
   const [isWinnerAnim, setWinnerAnim] = useState(false);
@@ -56,7 +57,6 @@ function App() {
     setHintAvailable(false);
     const gameResultIndices = loadGameResultIndices();
     setGameResultIndices(gameResultIndices);
-    console.log('gameIndices ', gameResultIndices);
     const level = readLevel();
     if (level) {
       setCurrentWordToGuessIndex(doDebug ? 0 : level);
@@ -64,6 +64,11 @@ function App() {
 
     const gameState = readGameState();
     if (gameState) {
+      setGameState(gameState);
+    }
+  }, []); // empty second argument = "componentDidMount"
+
+  function setGameState (gameState) {
       setCurrentMapValues(gameState.map);
       setKeyboardData(gameState.keyboard);
       setCurrentRow(gameState.row);
@@ -79,11 +84,9 @@ function App() {
       if ( (gameState.row >= 4 ) && gameState.hintStep <= 2) {
           setHintAvailable(true);
       }
-    }
-  }, []); // empty second argument = "componentDidMount"
+  }
 
   const handleResetGame = () => {
-    console.log('resetGame');
     saveGameResult(currentMapValues, currentWordToGuessIndex);
     setWinnerAnim(false);
     setCurrentHintStep(0);
@@ -355,18 +358,29 @@ function App() {
     }
   }
 
-  const handleReplay = () => {
-    setReplayIndex(0);
-    const data = loadGameResult(0);
-    console.log('data = ', data);
+  const gotoReplay = (replayIndex) => {
+    if (replayIndex < 0 || replayIndex >= gameResultIndices.length) return;
+
+    setReplayIndex(replayIndex);
+    const data = loadGameResult(replayIndex);
     setCurrentMapValues(data.map);
+  }
+
+  const startReplay = () => {
+    const map = [...currentMapValues];
+    storeMapValues(map);
+    gotoReplay(0);
+  }
+  const stopReplay = () => {
+    setReplayIndex(null);
+    setCurrentMapValues(storedMapValues);
   }
 
   const getGrade = () => {
     const grades = ['A', 'B', 'C', 'D'];
     return `Grade ${grades[currentHintStep]}`;
   }
-  const showGameMap =  !showInstructions && !replayIndex;
+  const showGameMap =  !showInstructions;
   const showKeyboard = !showInstructions && !showOptions;
 
   return (
@@ -376,11 +390,13 @@ function App() {
         level={currentWordToGuessIndex}
         isHintAvailable={!showInstructions && isHintAvailable}
         replayIndex={replayIndex}
-        clearReplay={() => setReplayIndex(null)}
+        clearReplay={() => stopReplay()}
+        nextReplay={() => gotoReplay(replayIndex + 1)}
+        prevReplay={() => gotoReplay(replayIndex - 1)}
         handleOptions={()=>setShowOptions(true)}
         handleHint={() => handleHint()} />
       {showOptions &&
-        <Options text={['options']} onClick={() => setShowOptions(false)} handleReplay={() => handleReplay()} />
+        <Options text={['options']} onClick={() => setShowOptions(false)} handleReplay={() => startReplay()} />
       }
       {(!showInstructions && !showOptions) &&
         <GameMap

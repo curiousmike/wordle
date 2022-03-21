@@ -11,6 +11,9 @@ export const Container = styled.div`
   justify-content: space-between;;
 `;
 
+export const ReplayContainer = styled.div`
+  display: flex;
+`;
 export const Title = styled.div`
 align-self: center;
 font-size: 18px;
