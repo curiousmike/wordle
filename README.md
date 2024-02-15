@@ -1,4 +1,6 @@
-![alt text](https://github.com/curiousmike/wordle/blob/main/public/wordle.png?raw=true)# Getting Started with Create React App
+[<img src="https://github.com/curiousmike/wordle/blob/main/public/wordle.png" width="250"/>]
+
+# Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
